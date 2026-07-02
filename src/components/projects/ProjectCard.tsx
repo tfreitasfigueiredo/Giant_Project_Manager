@@ -61,7 +61,7 @@ export function ProjectCard({ project }: { project: Project }) {
           </div>
           <div className="flex items-center gap-2 rounded-xl bg-slate-950 px-3 py-2 text-xs font-semibold text-white">
             <Flag className="size-4" />
-            {project.highRisks} riscos altos - {project.executiveIssues} pendencias
+            {project.highRisks} riscos altos - {project.executiveIssues} pendências
           </div>
         </CardContent>
       </Card>

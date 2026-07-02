@@ -6,7 +6,7 @@ export function ProjectProgressCard({ project }: { project: Project }) {
   const variance = project.actualHours - project.plannedHours;
   return (
     <Card className="border-slate-200">
-      <CardHeader className="pb-2"><CardTitle className="text-sm text-slate-500">Avanco consolidado</CardTitle></CardHeader>
+      <CardHeader className="pb-2"><CardTitle className="text-sm text-slate-500">Avanço consolidado</CardTitle></CardHeader>
       <CardContent className="flex flex-col gap-4">
         <div className="flex items-end justify-between"><span className="text-3xl font-semibold text-slate-950">{project.progress}%</span><span className="text-sm text-slate-500">{project.completedActivities}/{project.totalActivities} atividades</span></div>
         <Progress value={project.progress} />

@@ -22,7 +22,7 @@ const rows = [
 
 export default function AdminPage() {
   return (
-    <PageContainer title="Usuarios" description="Gestao visual inicial de usuarios e papeis.">
+    <PageContainer title="Usuários" description="Gestão visual inicial de usuários e papéis.">
       <Card className="border-slate-200">
         <CardHeader><CardTitle>Cadastro mockado</CardTitle></CardHeader>
         <CardContent className="overflow-x-auto">

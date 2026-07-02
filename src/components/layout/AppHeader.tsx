@@ -7,43 +7,48 @@ import { CalendarDays, Download, Filter, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 
-const labels: Record<string, { title: string; subtitle: string }> = {
-  dashboard: {
-    title: "Visao Geral Executiva",
-    subtitle: "Performance da carteira, projetos em risco e pendencias criticas",
-  },
-  projects: {
-    title: "Projetos",
-    subtitle: "Acompanhamento executivo por iniciativa, cliente e fase",
-  },
-  "my-actions": {
-    title: "Minhas acoes",
-    subtitle: "Decisoes e pendencias que precisam de direcionamento",
-  },
-  templates: {
-    title: "Templates",
-    subtitle: "Modelos de governanca para acelerar novos projetos",
-  },
-  admin: {
-    title: "Administracao",
-    subtitle: "Cadastros mockados de usuarios, empresas e unidades",
-  },
-};
-
 const menuItems = [
-  ["/dashboard", "Visao Geral"],
+  ["/dashboard", "Visão Geral"],
   ["/projects", "Projetos"],
   ["/projects/boge-implantacao-operacional/risks", "Riscos"],
-  ["/projects/boge-implantacao-operacional/issues", "Pendencias"],
-  ["/my-actions", "Minhas acoes"],
+  ["/projects/boge-implantacao-operacional/issues", "Pendências"],
+  ["/my-actions", "Minhas Ações"],
   ["/templates", "Templates"],
-  ["/admin/users", "Usuarios"],
+  ["/admin/users", "Usuários"],
 ];
+
+function getHeaderContent(pathname: string) {
+  if (pathname === "/dashboard" || pathname === "/") {
+    return {
+      title: "Visão Geral Executiva",
+      subtitle: "Performance da carteira, projetos em risco e pendências críticas",
+    };
+  }
+  if (pathname === "/projects") {
+    return { title: "Projetos", subtitle: "Acompanhamento executivo por iniciativa, cliente e fase" };
+  }
+  if (pathname === "/projects/new") {
+    return { title: "Novo Projeto", subtitle: "Estruturação inicial de uma iniciativa executiva" };
+  }
+  if (pathname.startsWith("/projects/")) {
+    if (pathname.endsWith("/risks")) return { title: "Riscos", subtitle: "Severidade, impacto no go live e planos de mitigação" };
+    if (pathname.endsWith("/issues")) return { title: "Pendências", subtitle: "Responsáveis, prazos, impacto e próxima ação" };
+    if (pathname.endsWith("/activities")) return { title: "Atividades", subtitle: "Status, responsável, prazo, progresso e prioridade" };
+    if (pathname.endsWith("/time")) return { title: "Tempo", subtitle: "Planejado, realizado e variação executiva" };
+    if (pathname.endsWith("/status-report")) return { title: "Status Report", subtitle: "Resumo executivo responsivo para governança" };
+    return { title: "Projeto Executivo", subtitle: "Status geral, avanço, fase atual, riscos e próximos passos" };
+  }
+  if (pathname === "/my-actions") return { title: "Minhas Ações", subtitle: "Pendências e decisões que precisam de direcionamento" };
+  if (pathname === "/templates") return { title: "Templates", subtitle: "Modelos de governança para acelerar novos projetos" };
+  if (pathname === "/admin/users") return { title: "Administração / Usuários", subtitle: "Gestão visual inicial de usuários e papéis" };
+  if (pathname === "/admin/companies") return { title: "Administração / Empresas", subtitle: "Empresas e clientes da operação mockada" };
+  if (pathname === "/admin/units") return { title: "Administração / Unidades", subtitle: "Unidades de negócio e frentes operacionais" };
+  return { title: "Giant Projects", subtitle: "Cockpit executivo para gestão de projetos" };
+}
 
 export function AppHeader() {
   const pathname = usePathname();
-  const firstSegment = pathname.split("/").filter(Boolean)[0] ?? "dashboard";
-  const current = labels[firstSegment] ?? labels.projects;
+  const current = getHeaderContent(pathname);
 
   return (
     <header className="sticky top-0 z-30 border-b border-slate-200/80 bg-white/92 px-4 py-4 shadow-[0_10px_30px_rgba(15,23,42,0.04)] backdrop-blur-xl sm:px-6 lg:ml-72 lg:px-8">

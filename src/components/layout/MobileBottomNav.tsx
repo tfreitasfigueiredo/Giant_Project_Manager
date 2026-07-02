@@ -7,12 +7,20 @@ import { AlertTriangle, FolderKanban, Home, ListChecks, MoreHorizontal } from "l
 import { cn } from "@/lib/utils";
 
 const items = [
-  { href: "/dashboard", label: "Visao Geral", icon: Home },
+  { href: "/dashboard", label: "Visão Geral", icon: Home },
   { href: "/projects", label: "Projetos", icon: FolderKanban },
   { href: "/projects/boge-implantacao-operacional/risks", label: "Riscos", icon: AlertTriangle },
-  { href: "/projects/boge-implantacao-operacional/issues", label: "Pendencias", icon: ListChecks },
+  { href: "/projects/boge-implantacao-operacional/issues", label: "Pendências", icon: ListChecks },
   { href: "/templates", label: "Mais", icon: MoreHorizontal },
 ];
+
+function isActiveMobileItem(pathname: string, href: string) {
+  if (href.endsWith("/risks")) return pathname.endsWith("/risks");
+  if (href.endsWith("/issues")) return pathname.endsWith("/issues");
+  if (href === "/projects") return pathname === "/projects" || pathname === "/projects/new" || /^\/projects\/[^/]+$/.test(pathname);
+  if (href === "/templates") return pathname === "/templates" || pathname.startsWith("/admin/");
+  return pathname === href || pathname.startsWith(href + "/");
+}
 
 export function MobileBottomNav() {
   const pathname = usePathname();
@@ -22,7 +30,7 @@ export function MobileBottomNav() {
       <div className="grid grid-cols-5 gap-1">
         {items.map((item) => {
           const Icon = item.icon;
-          const active = pathname === item.href || pathname.startsWith(item.href + "/");
+          const active = isActiveMobileItem(pathname, item.href);
           return (
             <Link
               key={item.href}

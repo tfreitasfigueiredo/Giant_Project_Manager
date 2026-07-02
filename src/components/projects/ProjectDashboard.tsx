@@ -12,7 +12,7 @@ import { ActivityCard } from "@/components/activities/ActivityCard";
 import { ActivityStatusBadge } from "@/components/activities/ActivityStatusBadge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { getPortfolioStats, projects } from "@/data/mock-data";
+import { getPortfólioStats, projects } from "@/data/mock-data";
 import { issueRows, portfolioHealthRows, recentActivities, riskRows } from "@/data/dashboard-insights";
 import { cn } from "@/lib/utils";
 import { ProjectCard } from "./ProjectCard";
@@ -27,8 +27,8 @@ const kpis = [
   },
   {
     key: "portfolioHealth",
-    title: "Saude do Portfolio",
-    legend: "Visao consolidada",
+    title: "Saúde do Portfólio",
+    legend: "Visão consolidada",
     icon: ShieldCheck,
     tone: "emerald",
     value: "Boa",
@@ -43,7 +43,7 @@ const kpis = [
   },
   {
     key: "executiveIssues",
-    title: "Pendencias Executivas",
+    title: "Pendências Executivas",
     legend: "Aguardando acao",
     icon: ClipboardList,
     tone: "orange",
@@ -127,7 +127,7 @@ function SummaryBlock({
 }
 
 export function ProjectDashboard() {
-  const stats = getPortfolioStats();
+  const stats = getPortfólioStats();
   const kpiValues = {
     activeProjects: stats.activeProjects,
     portfolioHealth: "Boa",
@@ -148,7 +148,7 @@ export function ProjectDashboard() {
         <div className="mb-4 flex items-center justify-between gap-3">
           <div>
             <h3 className="text-lg font-bold text-slate-950">Projetos Ativos</h3>
-            <p className="text-sm text-slate-500">Avanco, fase atual, go live e alertas por iniciativa.</p>
+            <p className="text-sm text-slate-500">Avanço, fase atual, go live e alertas por iniciativa.</p>
           </div>
           <BriefcaseBusiness className="hidden size-5 text-slate-400 sm:block" />
         </div>
@@ -160,9 +160,9 @@ export function ProjectDashboard() {
       </section>
 
       <div className="grid gap-4 lg:grid-cols-3">
-        <SummaryBlock title="Saude dos Projetos" rows={portfolioHealthRows} />
+        <SummaryBlock title="Saúde dos Projetos" rows={portfolioHealthRows} />
         <SummaryBlock title="Riscos" rows={riskRows} />
-        <SummaryBlock title="Pendencias" rows={issueRows} />
+        <SummaryBlock title="Pendências" rows={issueRows} />
       </div>
 
       <section className="flex flex-col gap-4">
@@ -180,7 +180,7 @@ export function ProjectDashboard() {
               <TableRow>
                 <TableHead>Projeto</TableHead>
                 <TableHead>Atividade</TableHead>
-                <TableHead>Responsavel</TableHead>
+                <TableHead>Responsável</TableHead>
                 <TableHead>Prazo</TableHead>
                 <TableHead>Status</TableHead>
               </TableRow>

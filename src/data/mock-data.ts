@@ -1,7 +1,7 @@
-export type ProjectStatus = "on-track" | "attention" | "critical";
+﻿export type ProjectStatus = "on-track" | "attention" | "critical";
 export type ActivityStatus = "done" | "in-progress" | "blocked" | "planned";
-export type Priority = "Alta" | "Media" | "Baixa";
-export type RiskSeverity = "Alto" | "Medio" | "Baixo";
+export type Priority = "Alta" | "Média" | "Baixa";
+export type RiskSeverity = "Alto" | "Médio" | "Baixo";
 
 export type Project = {
   id: string;
@@ -62,20 +62,20 @@ export type Issue = {
 export const projects: Project[] = [
   {
     id: "boge-implantacao-operacional",
-    name: "BOGE - Implantacao Operacional",
+    name: "BOGE - Implantação Operacional",
     client: "BOGE",
-    unit: "Operacoes",
+    unit: "Operações",
     sponsor: "Diretoria Operacional",
     owner: "Mariana Costa",
     status: "attention",
-    phase: "Validacao operacional",
+    phase: "Validação operacional",
     goLive: "18 jul 2026",
     progress: 68,
     plannedHours: 420,
     actualHours: 392,
     executiveSummary:
-      "Implantacao avancando com boa adesao operacional, mas dependente de validacao de cadastros e decisao sobre rotina de corte ate o fim da semana.",
-    nextSteps: ["Fechar plano de corte", "Validar cadastros criticos", "Treinar lideres de turno"],
+      "Implantação avançando com boa adesão operacional, mas dependente de validação de cadastros e decisão sobre rotina de corte até o fim da semana.",
+    nextSteps: ["Fechar plano de corte", "Validar cadastros críticos", "Treinar líderes de turno"],
     decisionsPending: 2,
     executiveIssues: 3,
     highRisks: 1,
@@ -84,7 +84,7 @@ export const projects: Project[] = [
   },
   {
     id: "torre-controle-demandas",
-    name: "Torre de Controle - Gestao de Demandas",
+    name: "Torre de Controle - Gestão de Demandas",
     client: "Grupo Mirassol",
     unit: "Control Tower",
     sponsor: "Diretoria de Tecnologia",
@@ -96,7 +96,7 @@ export const projects: Project[] = [
     plannedHours: 360,
     actualHours: 338,
     executiveSummary:
-      "Piloto com indicadores estaveis e backlog priorizado. Proximo marco e consolidar modelo de governanca e publicar agenda de ritos.",
+      "Piloto com indicadores estáveis e backlog priorizado. Próximo marco é consolidar modelo de governança e publicar agenda de ritos.",
     nextSteps: ["Publicar rotina semanal", "Concluir painel de backlog", "Homologar SLA por tipo de demanda"],
     decisionsPending: 1,
     executiveIssues: 1,
@@ -112,14 +112,14 @@ export const projects: Project[] = [
     sponsor: "Diretoria Comercial",
     owner: "Bianca Reis",
     status: "critical",
-    phase: "Integracao de dados",
+    phase: "Integração de dados",
     goLive: "12 jul 2026",
     progress: 46,
     plannedHours: 280,
     actualHours: 318,
     executiveSummary:
-      "Projeto em risco por atraso na origem de dados e divergencias de regra de negocio. Requer decisao executiva para escopo minimo do primeiro go live.",
-    nextSteps: ["Definir escopo minimo", "Reprocessar base historica", "Alinhar regra de consolidacao"],
+      "Projeto em risco por atraso na origem de dados e divergências de regra de negócio. Requer decisão executiva para escopo mínimo do primeiro go live.",
+    nextSteps: ["Definir escopo mínimo", "Reprocessar base histórica", "Alinhar regra de consolidação"],
     decisionsPending: 3,
     executiveIssues: 4,
     highRisks: 2,
@@ -129,46 +129,46 @@ export const projects: Project[] = [
 ];
 
 export const activities: Activity[] = [
-  { id: "a1", projectId: "boge-implantacao-operacional", title: "Mapear rotina atual do patio", phase: "Diagnostico", owner: "Camila", dueDate: "03 jul", status: "done", progress: 100, priority: "Alta" },
-  { id: "a2", projectId: "boge-implantacao-operacional", title: "Validar cadastros de transportadoras", phase: "Validacao", owner: "Mariana", dueDate: "06 jul", status: "in-progress", progress: 62, priority: "Alta" },
-  { id: "a3", projectId: "boge-implantacao-operacional", title: "Preparar roteiro de treinamento", phase: "Treinamento", owner: "Diego", dueDate: "10 jul", status: "planned", progress: 20, priority: "Media" },
+  { id: "a1", projectId: "boge-implantacao-operacional", title: "Mapear rotina atual do pátio", phase: "Diagnóstico", owner: "Camila", dueDate: "03 jul", status: "done", progress: 100, priority: "Alta" },
+  { id: "a2", projectId: "boge-implantacao-operacional", title: "Validar cadastros de transportadoras", phase: "Validação", owner: "Mariana", dueDate: "06 jul", status: "in-progress", progress: 62, priority: "Alta" },
+  { id: "a3", projectId: "boge-implantacao-operacional", title: "Preparar roteiro de treinamento", phase: "Treinamento", owner: "Diego", dueDate: "10 jul", status: "planned", progress: 20, priority: "Média" },
   { id: "a4", projectId: "boge-implantacao-operacional", title: "Homologar plano de corte", phase: "Go live", owner: "Sponsor", dueDate: "11 jul", status: "blocked", progress: 35, priority: "Alta" },
-  { id: "a5", projectId: "torre-controle-demandas", title: "Configurar fila unica de demandas", phase: "Piloto", owner: "Rafael", dueDate: "04 jul", status: "done", progress: 100, priority: "Alta" },
-  { id: "a6", projectId: "torre-controle-demandas", title: "Definir SLA executivo", phase: "Governanca", owner: "Patricia", dueDate: "09 jul", status: "in-progress", progress: 74, priority: "Media" },
+  { id: "a5", projectId: "torre-controle-demandas", title: "Configurar fila única de demandas", phase: "Piloto", owner: "Rafael", dueDate: "04 jul", status: "done", progress: 100, priority: "Alta" },
+  { id: "a6", projectId: "torre-controle-demandas", title: "Definir SLA executivo", phase: "Governança", owner: "Patricia", dueDate: "09 jul", status: "in-progress", progress: 74, priority: "Média" },
   { id: "a7", projectId: "torre-controle-demandas", title: "Publicar dashboard de backlog", phase: "Indicadores", owner: "Rafael", dueDate: "15 jul", status: "in-progress", progress: 58, priority: "Alta" },
-  { id: "a8", projectId: "consulta-volumetria", title: "Revisar fonte de pedidos historicos", phase: "Dados", owner: "Bianca", dueDate: "05 jul", status: "blocked", progress: 40, priority: "Alta" },
+  { id: "a8", projectId: "consulta-volumetria", title: "Revisar fonte de pedidos históricos", phase: "Dados", owner: "Bianca", dueDate: "05 jul", status: "blocked", progress: 40, priority: "Alta" },
   { id: "a9", projectId: "consulta-volumetria", title: "Validar regra de volumetria por cliente", phase: "Regra", owner: "Comercial", dueDate: "08 jul", status: "in-progress", progress: 52, priority: "Alta" },
-  { id: "a10", projectId: "consulta-volumetria", title: "Criar visao de consulta executiva", phase: "Produto", owner: "Bianca", dueDate: "11 jul", status: "planned", progress: 25, priority: "Media" },
+  { id: "a10", projectId: "consulta-volumetria", title: "Criar visão de consulta executiva", phase: "Produto", owner: "Bianca", dueDate: "11 jul", status: "planned", progress: 25, priority: "Média" },
 ];
 
 export const risks: Risk[] = [
-  { id: "r1", projectId: "boge-implantacao-operacional", title: "Cadastros incompletos no corte", severity: "Alto", owner: "Mariana", goLiveImpact: "Pode atrasar virada operacional", mitigation: "Criar sala diaria de saneamento com Operacoes e TI." },
-  { id: "r2", projectId: "torre-controle-demandas", title: "Aderencia baixa aos ritos", severity: "Medio", owner: "Rafael", goLiveImpact: "Pode reduzir confiabilidade dos indicadores", mitigation: "Publicar agenda executiva e reforcar responsaveis por backlog." },
-  { id: "r3", projectId: "consulta-volumetria", title: "Fonte historica instavel", severity: "Alto", owner: "Bianca", goLiveImpact: "Ameaca o go live de 12 jul", mitigation: "Congelar escopo minimo e validar amostra manual." },
-  { id: "r4", projectId: "consulta-volumetria", title: "Divergencia de regra comercial", severity: "Alto", owner: "Comercial", goLiveImpact: "Pode gerar numero executivo incorreto", mitigation: "Decisao em comite sobre regra padrao para primeira versao." },
+  { id: "r1", projectId: "boge-implantacao-operacional", title: "Cadastros incompletos no corte", severity: "Alto", owner: "Mariana", goLiveImpact: "Pode atrasar virada operacional", mitigation: "Criar sala diária de saneamento com Operações e TI." },
+  { id: "r2", projectId: "torre-controle-demandas", title: "Aderência baixa aos ritos", severity: "Médio", owner: "Rafael", goLiveImpact: "Pode reduzir confiabilidade dos indicadores", mitigation: "Publicar agenda executiva e reforçar responsáveis por backlog." },
+  { id: "r3", projectId: "consulta-volumetria", title: "Fonte histórica instavel", severity: "Alto", owner: "Bianca", goLiveImpact: "Ameaça o go live de 12 jul", mitigation: "Congelar escopo mínimo e validar amostra manual." },
+  { id: "r4", projectId: "consulta-volumetria", title: "Divergência de regra comercial", severity: "Alto", owner: "Comercial", goLiveImpact: "Pode gerar número executivo incorreto", mitigation: "Decisão em comitê sobre regra padrão para primeira versão." },
 ];
 
 export const issues: Issue[] = [
-  { id: "i1", projectId: "boge-implantacao-operacional", title: "Aprovacao do plano de corte", source: "Comite de go live", owner: "Sponsor", dueDate: "05 jul", impact: "Define data de virada", nextAction: "Validar janela operacional", critical: true },
-  { id: "i2", projectId: "boge-implantacao-operacional", title: "Lista final de usuarios-chave", source: "Operacoes", owner: "Camila", dueDate: "07 jul", impact: "Afeta treinamento", nextAction: "Confirmar lideres por turno", critical: false },
-  { id: "i3", projectId: "torre-controle-demandas", title: "Politica de priorizacao executiva", source: "PMO", owner: "Patricia", dueDate: "09 jul", impact: "Afeta SLA e fila unica", nextAction: "Aprovar matriz RICE simplificada", critical: false },
-  { id: "i4", projectId: "consulta-volumetria", title: "Decisao de escopo minimo", source: "Diretoria Comercial", owner: "Sponsor", dueDate: "04 jul", impact: "Sem decisao, go live fica critico", nextAction: "Escolher regra de consolidacao", critical: true },
-  { id: "i5", projectId: "consulta-volumetria", title: "Arquivo historico divergente", source: "Dados", owner: "Bianca", dueDate: "06 jul", impact: "Volumetria final pode variar", nextAction: "Reprocessar base com amostra validada", critical: true },
+  { id: "i1", projectId: "boge-implantacao-operacional", title: "Aprovação do plano de corte", source: "Comitê de go live", owner: "Sponsor", dueDate: "05 jul", impact: "Define data de virada", nextAction: "Validar janela operacional", critical: true },
+  { id: "i2", projectId: "boge-implantacao-operacional", title: "Lista final de usuários-chave", source: "Operações", owner: "Camila", dueDate: "07 jul", impact: "Afeta treinamento", nextAction: "Confirmar líderes por turno", critical: false },
+  { id: "i3", projectId: "torre-controle-demandas", title: "Política de priorização executiva", source: "PMO", owner: "Patricia", dueDate: "09 jul", impact: "Afeta SLA e fila única", nextAction: "Aprovar matriz RICE simplificada", critical: false },
+  { id: "i4", projectId: "consulta-volumetria", title: "Decisão de escopo mínimo", source: "Diretoria Comercial", owner: "Sponsor", dueDate: "04 jul", impact: "Sem decisão, go live fica crítico", nextAction: "Escolher regra de consolidação", critical: true },
+  { id: "i5", projectId: "consulta-volumetria", title: "Arquivo histórico divergente", source: "Dados", owner: "Bianca", dueDate: "06 jul", impact: "Volumetria final pode variar", nextAction: "Reprocessar base com amostra validada", critical: true },
 ];
 
 export const statusReport = {
   title: "Status Report Executivo",
   period: "Semana 27/2026",
   executiveNarrative:
-    "Carteira com dois projetos sob controle e um projeto critico exigindo decisao executiva. Prioridade da semana: proteger go lives de julho e reduzir pendencias de escopo.",
-  highlights: ["82% de avanco no piloto da Torre de Controle", "Consulta Volumetria requer decisao de escopo", "BOGE entra em validacao operacional final"],
-  nextSteps: ["Comite executivo de escopo", "Plano de go live BOGE", "Publicacao da rotina de Torre de Controle"],
+    "Carteira com dois projetos sob controle e um projeto crítico exigindo decisão executiva. Prioridade da semana: proteger go lives de julho e reduzir pendências de escopo.",
+  highlights: ["82% de avanço no piloto da Torre de Controle", "Consulta Volumetria requer decisão de escopo", "BOGE entra em validação operacional final"],
+  nextSteps: ["Comitê executivo de escopo", "Plano de go live BOGE", "Publicação da rotina de Torre de Controle"],
 };
 
 export const templates = [
-  { title: "Implantacao Operacional", description: "Fases para rollout, treinamento, corte e estabilizacao." },
-  { title: "Cockpit de Demandas", description: "Modelo de governanca para fila unica, SLA e backlog executivo." },
-  { title: "Produto de Dados", description: "Checklist para fontes, regras, homologacao e consulta executiva." },
+  { title: "Implantação Operacional", description: "Fases para rollout, treinamento, corte e estabilização." },
+  { title: "Cockpit de Demandas", description: "Modelo de governança para fila única, SLA e backlog executivo." },
+  { title: "Produto de Dados", description: "Checklist para fontes, regras, homologação e consulta executiva." },
 ];
 
 export function getProject(projectId: string) {
@@ -187,7 +187,7 @@ export function getProjectIssues(projectId: string) {
   return issues.filter((issue) => issue.projectId === projectId);
 }
 
-export function getPortfolioStats() {
+export function getPortfólioStats() {
   return {
     activeProjects: projects.length,
     attentionProjects: projects.filter((project) => project.status === "attention").length,
@@ -197,3 +197,4 @@ export function getPortfolioStats() {
     upcomingGoLives: projects.filter((project) => project.goLive.includes("jul")).length,
   };
 }
+

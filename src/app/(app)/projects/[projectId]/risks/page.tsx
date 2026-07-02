@@ -6,5 +6,5 @@ export default async function RisksPage({ params }: { params: Promise<{ projectI
   const { projectId } = await params;
   const project = getProject(projectId);
   const risks = getProjectRisks(project.id);
-  return <PageContainer title="Riscos" description={`${project.name} · severidade, impacto no go live, responsavel e mitigacao.`}><div className="grid gap-4">{risks.map((risk) => <RiskCard key={risk.id} risk={risk} />)}</div></PageContainer>;
+  return <PageContainer title="Riscos" description={`${project.name} · severidade, impacto no go live, responsável e mitigação.`}><div className="grid gap-4">{risks.map((risk) => <RiskCard key={risk.id} risk={risk} />)}</div></PageContainer>;
 }

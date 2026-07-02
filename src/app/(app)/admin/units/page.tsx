@@ -4,7 +4,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 
 const rows = [
   {
-    "name": "Operacoes",
+    "name": "Operações",
     "role": "Unidade",
     "status": "Ativo"
   },

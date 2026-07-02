@@ -19,16 +19,33 @@ import {
 import { cn } from "@/lib/utils";
 
 const navigation = [
-  { href: "/dashboard", label: "Visao Geral", icon: Home },
+  { href: "/dashboard", label: "Visão Geral", icon: Home },
   { href: "/projects", label: "Projetos", icon: FolderKanban },
   { href: "/projects/boge-implantacao-operacional/risks", label: "Riscos", icon: AlertTriangle },
-  { href: "/projects/boge-implantacao-operacional/issues", label: "Pendencias", icon: ListChecks },
-  { href: "/my-actions", label: "Minhas acoes", icon: BarChart3 },
+  { href: "/projects/boge-implantacao-operacional/issues", label: "Pendências", icon: ListChecks },
+  { href: "/my-actions", label: "Minhas Ações", icon: BarChart3 },
   { href: "/templates", label: "Templates", icon: LayoutTemplate },
-  { href: "/admin/users", label: "Usuarios", icon: Users },
+  { href: "/admin/users", label: "Usuários", icon: Users },
   { href: "/admin/companies", label: "Empresas", icon: Building2 },
   { href: "/admin/units", label: "Unidades", icon: ShieldCheck },
 ];
+
+function isActiveNavItem(pathname: string, href: string) {
+  if (href.endsWith("/risks")) return pathname.endsWith("/risks");
+  if (href.endsWith("/issues")) return pathname.endsWith("/issues");
+  if (href === "/projects") {
+    return (
+      pathname === "/projects" ||
+      pathname === "/projects/new" ||
+      /^\/projects\/[^/]+$/.test(pathname) ||
+      pathname.endsWith("/activities") ||
+      pathname.endsWith("/time") ||
+      pathname.endsWith("/status-report")
+    );
+  }
+  if (href.startsWith("/admin/")) return pathname === href;
+  return pathname === href || pathname.startsWith(href + "/");
+}
 
 export function AppSidebar() {
   const pathname = usePathname();
@@ -47,7 +64,7 @@ export function AppSidebar() {
       <nav className="relative mt-8 flex flex-col gap-1">
         {navigation.map((item) => {
           const Icon = item.icon;
-          const active = pathname === item.href || pathname.startsWith(item.href + "/");
+          const active = isActiveNavItem(pathname, item.href);
           return (
             <Link
               key={item.href}
@@ -70,11 +87,11 @@ export function AppSidebar() {
             <FileText className="size-4 text-sky-200" />
             Carteira Julho
           </div>
-          <p className="mt-2 text-xs leading-5 text-slate-300">Foco em go lives, decisoes executivas e reducao de pendencias criticas.</p>
+          <p className="mt-2 text-xs leading-5 text-slate-300">Foco em go lives, decisões executivas e redução de pendências críticas.</p>
         </div>
         <Link href="/admin/users" className="flex items-center gap-3 rounded-xl px-3 py-2 text-sm text-slate-300 hover:bg-white/10 hover:text-white">
           <Settings className="size-4" />
-          Configuracoes
+          Configurações
         </Link>
       </div>
     </aside>
