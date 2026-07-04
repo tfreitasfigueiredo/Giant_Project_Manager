@@ -1,8 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client"
   output   = "../src/generated/prisma"
@@ -10,4 +5,718 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+}
+
+enum EntityStatus {
+  ACTIVE
+  INACTIVE
+  ARCHIVED
+}
+
+enum UserStatus {
+  INVITED
+  ACTIVE
+  SUSPENDED
+  INACTIVE
+}
+
+enum RoleProfile {
+  ADMIN
+  KEY_USER
+  PARTICIPANT
+  CLIENT
+  PMO
+  PROJECT_MANAGER
+  EXECUTIVE
+}
+
+enum ProjectType {
+  IMPLEMENTATION
+  CONTROL_TOWER
+  DATA_PRODUCT
+  INTERNAL_IMPROVEMENT
+}
+
+enum ProjectStatus {
+  PLANNED
+  ON_TRACK
+  ATTENTION
+  CRITICAL
+  PAUSED
+  COMPLETED
+  CANCELLED
+}
+
+enum ProjectPhaseStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  BLOCKED
+  DONE
+  CANCELLED
+}
+
+enum ProjectActivityStatus {
+  PLANNED
+  IN_PROGRESS
+  BLOCKED
+  DONE
+  CANCELLED
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum Visibility {
+  INTERNAL
+  EXECUTIVE
+  CLIENT
+  PUBLIC
+}
+
+enum Probability {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum Impact {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum RiskSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum RiskStatus {
+  OPEN
+  MITIGATING
+  ACCEPTED
+  CLOSED
+}
+
+enum IssueOrigin {
+  CLIENT
+  INTERNAL
+  PMO
+  OPERATIONS
+  TECHNOLOGY
+  COMMERCIAL
+  EXECUTIVE
+}
+
+enum IssueStatus {
+  OPEN
+  IN_PROGRESS
+  WAITING_DECISION
+  RESOLVED
+  CANCELLED
+}
+
+enum DecisionStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  DEFERRED
+}
+
+enum NextStepStatus {
+  OPEN
+  IN_PROGRESS
+  DONE
+  CANCELLED
+}
+
+enum CommentEntityType {
+  PROJECT
+  PHASE
+  ACTIVITY
+  RISK
+  ISSUE
+  DECISION
+  NEXT_STEP
+  STATUS_SNAPSHOT
+  STATUS_REPORT
+}
+
+enum AttachmentEntityType {
+  PROJECT
+  PHASE
+  ACTIVITY
+  RISK
+  ISSUE
+  DECISION
+  NEXT_STEP
+  STATUS_SNAPSHOT
+  STATUS_REPORT
+}
+
+enum AuditEntityType {
+  TENANT
+  COMPANY
+  UNIT
+  USER
+  ROLE
+  USER_ACCESS
+  PROJECT
+  PROJECT_MEMBER
+  PHASE
+  ACTIVITY
+  TIME_ENTRY
+  RISK
+  ISSUE
+  DECISION
+  NEXT_STEP
+  STATUS_SNAPSHOT
+  STATUS_REPORT
+  COMMENT
+  ATTACHMENT
+}
+
+model Tenant {
+  id        String       @id @default(uuid()) @db.Uuid
+  name      String
+  slug      String       @unique
+  status    EntityStatus @default(ACTIVE)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  companies         Company[]
+  units             Unit[]
+  users             AppUser[]
+  roles             Role[]
+  userAccesses      UserAccess[]
+  projects          Project[]
+  projectMembers    ProjectMember[]
+  projectPhases     ProjectPhase[]
+  projectActivities ProjectActivity[]
+  timeEntries       TimeEntry[]
+  risks             Risk[]
+  issues            Issue[]
+  decisions         Decision[]
+  nextSteps         NextStep[]
+  statusSnapshots   StatusSnapshot[]
+  statusReports     StatusReport[]
+  comments          Comment[]
+  attachments       Attachment[]
+  auditLogs         AuditLog[]
+}
+
+model Company {
+  id        String       @id @default(uuid()) @db.Uuid
+  tenantId  String       @db.Uuid
+  name      String
+  legalName String?
+  status    EntityStatus @default(ACTIVE)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  tenant       Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  units        Unit[]
+  users        AppUser[]
+  userAccesses UserAccess[]
+  projects     Project[]
+
+  @@unique([tenantId, name])
+  @@index([tenantId])
+  @@index([tenantId, status])
+}
+
+model Unit {
+  id        String       @id @default(uuid()) @db.Uuid
+  tenantId  String       @db.Uuid
+  companyId String       @db.Uuid
+  name      String
+  status    EntityStatus @default(ACTIVE)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  tenant       Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  company      Company      @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  users        AppUser[]
+  userAccesses UserAccess[]
+  projects     Project[]
+
+  @@unique([tenantId, companyId, name])
+  @@index([tenantId])
+  @@index([companyId])
+  @@index([tenantId, status])
+}
+
+model AppUser {
+  id        String     @id @default(uuid()) @db.Uuid
+  tenantId  String     @db.Uuid
+  companyId String?    @db.Uuid
+  unitId    String?    @db.Uuid
+  name      String
+  email     String
+  jobTitle  String?
+  status    UserStatus @default(ACTIVE)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  tenant              Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  company             Company?          @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  unit                Unit?             @relation(fields: [unitId], references: [id], onDelete: SetNull)
+  accesses            UserAccess[]
+  projectMembers      ProjectMember[]
+  sponsoredProjects   Project[]         @relation("ProjectSponsor")
+  ownedProjects       Project[]         @relation("ProjectOwner")
+  ownedActivities     ProjectActivity[] @relation("ActivityOwner")
+  timeEntries         TimeEntry[]
+  ownedRisks          Risk[]            @relation("RiskOwner")
+  ownedIssues         Issue[]           @relation("IssueOwner")
+  ownedDecisions      Decision[]        @relation("DecisionOwner")
+  decidedDecisions    Decision[]        @relation("DecisionDecider")
+  ownedNextSteps      NextStep[]        @relation("NextStepOwner")
+  createdReports      StatusReport[]    @relation("StatusReportCreator")
+  authoredComments    Comment[]         @relation("CommentAuthor")
+  uploadedAttachments Attachment[]      @relation("AttachmentUploader")
+  auditLogs           AuditLog[]        @relation("AuditActor")
+
+  @@unique([tenantId, email])
+  @@index([tenantId])
+  @@index([companyId])
+  @@index([unitId])
+  @@index([tenantId, status])
+}
+
+model Role {
+  id        String       @id @default(uuid()) @db.Uuid
+  tenantId  String       @db.Uuid
+  code      RoleProfile
+  name      String
+  status    EntityStatus @default(ACTIVE)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  tenant         Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  accesses       UserAccess[]
+  projectMembers ProjectMember[]
+
+  @@unique([tenantId, code])
+  @@index([tenantId])
+  @@index([tenantId, status])
+}
+
+model UserAccess {
+  id        String       @id @default(uuid()) @db.Uuid
+  tenantId  String       @db.Uuid
+  userId    String       @db.Uuid
+  roleId    String       @db.Uuid
+  companyId String?      @db.Uuid
+  unitId    String?      @db.Uuid
+  status    EntityStatus @default(ACTIVE)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  tenant  Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user    AppUser  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role    Role     @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  company Company? @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  unit    Unit?    @relation(fields: [unitId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId])
+  @@index([userId])
+  @@index([roleId])
+  @@index([companyId])
+  @@index([unitId])
+  @@index([tenantId, status])
+}
+
+model Project {
+  id               String        @id @default(uuid()) @db.Uuid
+  tenantId         String        @db.Uuid
+  companyId        String        @db.Uuid
+  unitId           String?       @db.Uuid
+  sponsorId        String?       @db.Uuid
+  ownerId          String?       @db.Uuid
+  name             String
+  slug             String
+  type             ProjectType   @default(IMPLEMENTATION)
+  status           ProjectStatus @default(PLANNED)
+  visibility       Visibility    @default(EXECUTIVE)
+  phaseName        String?
+  targetGoLive     DateTime?
+  actualGoLive     DateTime?
+  progress         Int           @default(0)
+  plannedHours     Decimal       @default(0) @db.Decimal(10, 2)
+  actualHours      Decimal       @default(0) @db.Decimal(10, 2)
+  executiveSummary String?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  tenant          Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  company         Company           @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  unit            Unit?             @relation(fields: [unitId], references: [id], onDelete: SetNull)
+  sponsor         AppUser?          @relation("ProjectSponsor", fields: [sponsorId], references: [id], onDelete: SetNull)
+  owner           AppUser?          @relation("ProjectOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+  members         ProjectMember[]
+  phases          ProjectPhase[]
+  activities      ProjectActivity[]
+  timeEntries     TimeEntry[]
+  risks           Risk[]
+  issues          Issue[]
+  decisions       Decision[]
+  nextSteps       NextStep[]
+  statusSnapshots StatusSnapshot[]
+  statusReports   StatusReport[]
+
+  @@unique([tenantId, slug])
+  @@index([tenantId])
+  @@index([companyId])
+  @@index([unitId])
+  @@index([sponsorId])
+  @@index([ownerId])
+  @@index([tenantId, status])
+  @@index([tenantId, targetGoLive])
+}
+
+model ProjectMember {
+  id        String       @id @default(uuid()) @db.Uuid
+  tenantId  String       @db.Uuid
+  projectId String       @db.Uuid
+  userId    String       @db.Uuid
+  roleId    String?      @db.Uuid
+  profile   RoleProfile  @default(PARTICIPANT)
+  status    EntityStatus @default(ACTIVE)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  tenant  Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user    AppUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role    Role?   @relation(fields: [roleId], references: [id], onDelete: SetNull)
+
+  @@unique([projectId, userId])
+  @@index([tenantId])
+  @@index([projectId])
+  @@index([userId])
+  @@index([roleId])
+}
+
+model ProjectPhase {
+  id          String             @id @default(uuid()) @db.Uuid
+  tenantId    String             @db.Uuid
+  projectId   String             @db.Uuid
+  name        String
+  description String?
+  status      ProjectPhaseStatus @default(NOT_STARTED)
+  orderIndex  Int
+  startDate   DateTime?
+  dueDate     DateTime?
+  completedAt DateTime?
+  progress    Int                @default(0)
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
+  tenant     Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  project    Project           @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  activities ProjectActivity[]
+
+  @@unique([projectId, orderIndex])
+  @@index([tenantId])
+  @@index([projectId])
+  @@index([tenantId, status])
+}
+
+model ProjectActivity {
+  id          String                @id @default(uuid()) @db.Uuid
+  tenantId    String                @db.Uuid
+  projectId   String                @db.Uuid
+  phaseId     String?               @db.Uuid
+  ownerId     String?               @db.Uuid
+  title       String
+  description String?
+  status      ProjectActivityStatus @default(PLANNED)
+  priority    Priority              @default(MEDIUM)
+  dueDate     DateTime?
+  completedAt DateTime?
+  progress    Int                   @default(0)
+  orderIndex  Int                   @default(0)
+  createdAt   DateTime              @default(now())
+  updatedAt   DateTime              @updatedAt
+
+  tenant      Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  project     Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  phase       ProjectPhase? @relation(fields: [phaseId], references: [id], onDelete: SetNull)
+  owner       AppUser?      @relation("ActivityOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+  timeEntries TimeEntry[]
+  issues      Issue[]
+
+  @@index([tenantId])
+  @@index([projectId])
+  @@index([phaseId])
+  @@index([ownerId])
+  @@index([tenantId, status])
+  @@index([tenantId, dueDate])
+}
+
+model TimeEntry {
+  id         String       @id @default(uuid()) @db.Uuid
+  tenantId   String       @db.Uuid
+  projectId  String       @db.Uuid
+  activityId String?      @db.Uuid
+  userId     String       @db.Uuid
+  entryDate  DateTime
+  hours      Decimal      @db.Decimal(8, 2)
+  notes      String?
+  billable   Boolean      @default(false)
+  status     EntityStatus @default(ACTIVE)
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+
+  tenant   Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  project  Project          @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  activity ProjectActivity? @relation(fields: [activityId], references: [id], onDelete: SetNull)
+  user     AppUser          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([projectId])
+  @@index([activityId])
+  @@index([userId])
+  @@index([tenantId, entryDate])
+}
+
+model Risk {
+  id           String       @id @default(uuid()) @db.Uuid
+  tenantId     String       @db.Uuid
+  projectId    String       @db.Uuid
+  ownerId      String?      @db.Uuid
+  title        String
+  description  String?
+  probability  Probability  @default(MEDIUM)
+  impact       Impact       @default(MEDIUM)
+  severity     RiskSeverity @default(MEDIUM)
+  status       RiskStatus   @default(OPEN)
+  goLiveImpact String?
+  mitigation   String?
+  dueDate      DateTime?
+  closedAt     DateTime?
+  visibility   Visibility   @default(EXECUTIVE)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  tenant  Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  project Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  owner   AppUser? @relation("RiskOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId])
+  @@index([projectId])
+  @@index([ownerId])
+  @@index([tenantId, severity])
+  @@index([tenantId, status])
+}
+
+model Issue {
+  id          String      @id @default(uuid()) @db.Uuid
+  tenantId    String      @db.Uuid
+  projectId   String      @db.Uuid
+  activityId  String?     @db.Uuid
+  ownerId     String?     @db.Uuid
+  title       String
+  description String?
+  origin      IssueOrigin @default(INTERNAL)
+  status      IssueStatus @default(OPEN)
+  priority    Priority    @default(MEDIUM)
+  dueDate     DateTime?
+  impact      String?
+  nextAction  String?
+  isCritical  Boolean     @default(false)
+  visibility  Visibility  @default(EXECUTIVE)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  tenant   Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  project  Project          @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  activity ProjectActivity? @relation(fields: [activityId], references: [id], onDelete: SetNull)
+  owner    AppUser?         @relation("IssueOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId])
+  @@index([projectId])
+  @@index([activityId])
+  @@index([ownerId])
+  @@index([tenantId, status])
+  @@index([tenantId, priority])
+  @@index([tenantId, dueDate])
+}
+
+model Decision {
+  id          String         @id @default(uuid()) @db.Uuid
+  tenantId    String         @db.Uuid
+  projectId   String         @db.Uuid
+  ownerId     String?        @db.Uuid
+  decidedById String?        @db.Uuid
+  title       String
+  context     String?
+  status      DecisionStatus @default(PENDING)
+  dueDate     DateTime?
+  decidedAt   DateTime?
+  outcome     String?
+  visibility  Visibility     @default(EXECUTIVE)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  owner     AppUser? @relation("DecisionOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+  decidedBy AppUser? @relation("DecisionDecider", fields: [decidedById], references: [id], onDelete: SetNull)
+
+  @@index([tenantId])
+  @@index([projectId])
+  @@index([ownerId])
+  @@index([decidedById])
+  @@index([tenantId, status])
+  @@index([tenantId, dueDate])
+}
+
+model NextStep {
+  id          String         @id @default(uuid()) @db.Uuid
+  tenantId    String         @db.Uuid
+  projectId   String         @db.Uuid
+  ownerId     String?        @db.Uuid
+  title       String
+  description String?
+  status      NextStepStatus @default(OPEN)
+  priority    Priority       @default(MEDIUM)
+  dueDate     DateTime?
+  orderIndex  Int            @default(0)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  tenant  Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  project Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  owner   AppUser? @relation("NextStepOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId])
+  @@index([projectId])
+  @@index([ownerId])
+  @@index([tenantId, status])
+  @@index([tenantId, dueDate])
+}
+
+model StatusSnapshot {
+  id                    String        @id @default(uuid()) @db.Uuid
+  tenantId              String        @db.Uuid
+  projectId             String        @db.Uuid
+  status                ProjectStatus
+  progress              Int           @default(0)
+  healthLabel           String?
+  phaseName             String?
+  goLiveDate            DateTime?
+  highRisksCount        Int           @default(0)
+  criticalIssuesCount   Int           @default(0)
+  decisionsPendingCount Int           @default(0)
+  summary               String?
+  snapshotAt            DateTime      @default(now())
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
+
+  tenant  Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  project Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  reports StatusReport[]
+
+  @@index([tenantId])
+  @@index([projectId])
+  @@index([tenantId, snapshotAt])
+  @@index([tenantId, status])
+}
+
+model StatusReport {
+  id          String     @id @default(uuid()) @db.Uuid
+  tenantId    String     @db.Uuid
+  projectId   String     @db.Uuid
+  snapshotId  String?    @db.Uuid
+  createdById String?    @db.Uuid
+  title       String
+  periodStart DateTime
+  periodEnd   DateTime
+  version     Int        @default(1)
+  htmlContent String
+  visibility  Visibility @default(EXECUTIVE)
+  publishedAt DateTime?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  tenant    Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  project   Project         @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  snapshot  StatusSnapshot? @relation(fields: [snapshotId], references: [id], onDelete: SetNull)
+  createdBy AppUser?        @relation("StatusReportCreator", fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@index([tenantId])
+  @@index([projectId])
+  @@index([snapshotId])
+  @@index([createdById])
+  @@index([tenantId, periodStart, periodEnd])
+}
+
+model Comment {
+  id         String            @id @default(uuid()) @db.Uuid
+  tenantId   String            @db.Uuid
+  authorId   String?           @db.Uuid
+  entityType CommentEntityType
+  entityId   String            @db.Uuid
+  body       String
+  visibility Visibility        @default(INTERNAL)
+  createdAt  DateTime          @default(now())
+  updatedAt  DateTime          @updatedAt
+
+  tenant Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  author AppUser? @relation("CommentAuthor", fields: [authorId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId])
+  @@index([authorId])
+  @@index([tenantId, entityType, entityId])
+}
+
+model Attachment {
+  id           String               @id @default(uuid()) @db.Uuid
+  tenantId     String               @db.Uuid
+  uploadedById String?              @db.Uuid
+  entityType   AttachmentEntityType
+  entityId     String               @db.Uuid
+  fileName     String
+  fileUrl      String
+  mimeType     String?
+  sizeBytes    Int?
+  visibility   Visibility           @default(INTERNAL)
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
+
+  tenant     Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  uploadedBy AppUser? @relation("AttachmentUploader", fields: [uploadedById], references: [id], onDelete: SetNull)
+
+  @@index([tenantId])
+  @@index([uploadedById])
+  @@index([tenantId, entityType, entityId])
+}
+
+model AuditLog {
+  id         String          @id @default(uuid()) @db.Uuid
+  tenantId   String          @db.Uuid
+  actorId    String?         @db.Uuid
+  entityType AuditEntityType
+  entityId   String?         @db.Uuid
+  action     String
+  summary    String?
+  metadata   Json?
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+
+  tenant Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  actor  AppUser? @relation("AuditActor", fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId])
+  @@index([actorId])
+  @@index([tenantId, entityType, entityId])
+  @@index([tenantId, createdAt])
 }
