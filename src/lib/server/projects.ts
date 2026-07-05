@@ -514,12 +514,10 @@ export async function getProjectStatusReport(projectId: string): Promise<Project
       },
       risks: {
         orderBy: [{ severity: "desc" }, { createdAt: "asc" }],
-        take: 4,
         include: { owner: { select: { name: true } } },
       },
       issues: {
         orderBy: [{ isCritical: "desc" }, { dueDate: "asc" }, { createdAt: "asc" }],
-        take: 4,
         include: { owner: { select: { name: true } } },
       },
       decisions: { select: { status: true } },
@@ -558,6 +556,8 @@ export async function getProjectStatusReport(projectId: string): Promise<Project
   const nextSteps = project.nextSteps.map((step) => step.title);
   const risks = project.risks.map((risk) => mapRiskToVisual(risk, project.slug));
   const issues = project.issues.map((issue) => mapIssueToVisual(issue, project.slug));
+  const displayRisks = risks.slice(0, 4);
+  const displayIssues = issues.slice(0, 4);
   const completedTitles = project.activities
     .filter((activity) => activity.status === "DONE")
     .map((activity) => activity.title)
@@ -599,8 +599,8 @@ export async function getProjectStatusReport(projectId: string): Promise<Project
     highlights: completedTitles.length > 0 ? completedTitles : [`${baseProject.progress}% de avanço consolidado no projeto.`],
     attentionPoints: attentionPoints.length > 0 ? attentionPoints : ["Sem ponto crítico registrado no último status."],
     nextSteps,
-    risks,
-    issues,
+    risks: displayRisks,
+    issues: displayIssues,
     activitySummary: {
       completed: completedActivities,
       inProgress: inProgressActivities,
