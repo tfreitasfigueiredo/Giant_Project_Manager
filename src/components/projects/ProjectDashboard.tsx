@@ -1,4 +1,4 @@
-﻿import {
+import {
   AlertTriangle,
   BriefcaseBusiness,
   Clock3,
@@ -12,8 +12,7 @@ import { ActivityCard } from "@/components/activities/ActivityCard";
 import { ActivityStatusBadge } from "@/components/activities/ActivityStatusBadge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { getPortfólioStats, projects } from "@/data/mock-data";
-import { issueRows, portfolioHealthRows, recentActivities, riskRows } from "@/data/dashboard-insights";
+import type { DashboardData } from "@/lib/server/dashboard";
 import { cn } from "@/lib/utils";
 import { ProjectCard } from "./ProjectCard";
 
@@ -31,27 +30,25 @@ const kpis = [
     legend: "Visão consolidada",
     icon: ShieldCheck,
     tone: "emerald",
-    value: "Boa",
   },
   {
     key: "onTimePerformance",
     title: "Performance no Prazo",
-    legend: "Projetos em ritmo",
+    legend: "Avanço médio",
     icon: Clock3,
     tone: "emerald",
-    value: "67%",
   },
   {
     key: "executiveIssues",
     title: "Pendências Executivas",
-    legend: "Aguardando acao",
+    legend: "Aguardando ação",
     icon: ClipboardList,
     tone: "orange",
   },
   {
     key: "criticalProjects",
     title: "Projetos em Risco",
-    legend: "Requer atencao",
+    legend: "Requer atenção",
     icon: AlertTriangle,
     tone: "red",
   },
@@ -126,21 +123,12 @@ function SummaryBlock({
   );
 }
 
-export function ProjectDashboard() {
-  const stats = getPortfólioStats();
-  const kpiValues = {
-    activeProjects: stats.activeProjects,
-    portfolioHealth: "Boa",
-    onTimePerformance: "67%",
-    executiveIssues: stats.executiveIssues,
-    criticalProjects: stats.criticalProjects,
-  };
-
+export function ProjectDashboard({ data }: { data: DashboardData }) {
   return (
     <div className="flex flex-col gap-7">
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
         {kpis.map((item) => (
-          <ExecutiveKpiCard key={item.key} item={item} value={kpiValues[item.key]} />
+          <ExecutiveKpiCard key={item.key} item={item} value={data.kpiValues[item.key]} />
         ))}
       </div>
 
@@ -153,23 +141,23 @@ export function ProjectDashboard() {
           <BriefcaseBusiness className="hidden size-5 text-slate-400 sm:block" />
         </div>
         <div className="grid gap-4 lg:grid-cols-3">
-          {projects.map((project) => (
+          {data.projects.map((project) => (
             <ProjectCard key={project.id} project={project} />
           ))}
         </div>
       </section>
 
       <div className="grid gap-4 lg:grid-cols-3">
-        <SummaryBlock title="Saúde dos Projetos" rows={portfolioHealthRows} />
-        <SummaryBlock title="Riscos" rows={riskRows} />
-        <SummaryBlock title="Pendências" rows={issueRows} />
+        <SummaryBlock title="Saúde dos Projetos" rows={data.portfolioHealthRows} />
+        <SummaryBlock title="Riscos" rows={data.riskRows} />
+        <SummaryBlock title="Pendências" rows={data.issueRows} />
       </div>
 
       <section className="flex flex-col gap-4">
         <div className="flex items-center justify-between gap-3">
           <div>
             <h3 className="text-lg font-bold text-slate-950">Atividades Recentes</h3>
-            <p className="text-sm text-slate-500">Movimentos recentes da carteira mockada.</p>
+            <p className="text-sm text-slate-500">Movimentos recentes da carteira.</p>
           </div>
           <TrendingUp className="hidden size-5 text-slate-400 sm:block" />
         </div>
@@ -186,7 +174,7 @@ export function ProjectDashboard() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {recentActivities.map((activity) => (
+              {data.recentActivities.map((activity) => (
                 <TableRow key={activity.id}>
                   <TableCell className="max-w-64 font-semibold text-slate-950">{activity.projectName}</TableCell>
                   <TableCell>{activity.title}</TableCell>
@@ -200,7 +188,7 @@ export function ProjectDashboard() {
         </div>
 
         <div className="grid gap-3 lg:hidden">
-          {recentActivities.slice(0, 4).map((activity) => (
+          {data.recentActivities.slice(0, 4).map((activity) => (
             <ActivityCard key={activity.id} activity={activity} />
           ))}
         </div>
@@ -208,4 +196,3 @@ export function ProjectDashboard() {
     </div>
   );
 }
-
