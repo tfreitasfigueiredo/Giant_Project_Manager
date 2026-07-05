@@ -1,6 +1,15 @@
 import { PageContainer } from "@/components/layout/PageContainer";
 import { ProjectsList } from "@/components/projects/ProjectsList";
+import { getProjectsForList } from "@/lib/server/projects";
 
-export default function ProjectsPage() {
-  return <PageContainer title="Projetos" description="Filtre, acompanhe e acesse a visao executiva de cada iniciativa."><ProjectsList /></PageContainer>;
+export const dynamic = "force-dynamic";
+
+export default async function ProjectsPage() {
+  const projects = await getProjectsForList();
+
+  return (
+    <PageContainer title="Projetos" description="Filtre, acompanhe e acesse a visao executiva de cada iniciativa.">
+      <ProjectsList projects={projects} />
+    </PageContainer>
+  );
 }
