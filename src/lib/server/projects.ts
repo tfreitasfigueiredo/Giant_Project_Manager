@@ -625,3 +625,95 @@ export async function getProjectStatusReport(projectId: string): Promise<Project
     sanitizedHtml: sanitizeStatusReportHtml(latestReport?.htmlContent ?? null),
   };
 }
+export type ProjectEditorOption = {
+  id: string;
+  name: string;
+};
+
+export type ProjectMainDataEditorData = {
+  project: {
+    id: string;
+    slug: string;
+    name: string;
+    executiveSummary: string;
+    status: string;
+    targetGoLive: string;
+    progress: number;
+    companyId: string;
+    unitId: string | null;
+    ownerId: string | null;
+    sponsorId: string | null;
+  };
+  options: {
+    companies: ProjectEditorOption[];
+    units: ProjectEditorOption[];
+    users: ProjectEditorOption[];
+  };
+};
+
+function formatDateInput(date: Date | null): string {
+  if (!date) return "";
+
+  return date.toISOString().slice(0, 10);
+}
+
+export async function getProjectMainDataEditor(projectId: string): Promise<ProjectMainDataEditorData | null> {
+  const project = await prisma.project.findFirst({
+    where: { OR: getProjectLookupFilters(projectId) },
+    select: {
+      id: true,
+      tenantId: true,
+      slug: true,
+      name: true,
+      executiveSummary: true,
+      status: true,
+      targetGoLive: true,
+      progress: true,
+      companyId: true,
+      unitId: true,
+      ownerId: true,
+      sponsorId: true,
+    },
+  });
+
+  if (!project) return null;
+
+  const [companies, units, users] = await Promise.all([
+    prisma.company.findMany({
+      where: { tenantId: project.tenantId, status: "ACTIVE" },
+      orderBy: { name: "asc" },
+      select: { id: true, name: true },
+    }),
+    prisma.unit.findMany({
+      where: { tenantId: project.tenantId, status: "ACTIVE" },
+      orderBy: { name: "asc" },
+      select: { id: true, name: true },
+    }),
+    prisma.appUser.findMany({
+      where: { tenantId: project.tenantId, status: "ACTIVE" },
+      orderBy: { name: "asc" },
+      select: { id: true, name: true },
+    }),
+  ]);
+
+  return {
+    project: {
+      id: project.id,
+      slug: project.slug,
+      name: project.name,
+      executiveSummary: project.executiveSummary ?? "",
+      status: project.status,
+      targetGoLive: formatDateInput(project.targetGoLive),
+      progress: project.progress,
+      companyId: project.companyId,
+      unitId: project.unitId,
+      ownerId: project.ownerId,
+      sponsorId: project.sponsorId,
+    },
+    options: {
+      companies,
+      units,
+      users,
+    },
+  };
+}
