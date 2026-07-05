@@ -1,6 +1,7 @@
 import "server-only";
 
 import type { Activity, ActivityStatus, Priority, Project, ProjectStatus } from "@/data/mock-data";
+import type { ProjectStatus as PrismaProjectStatus } from "@/generated/prisma/client";
 import { prisma } from "./prisma";
 
 export type DashboardSummaryTone = "emerald" | "orange" | "red" | "slate" | "amber";
@@ -55,7 +56,7 @@ const priorityMap: Record<string, Priority> = {
 };
 
 const monthLabels = ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"];
-const activeProjectStatuses = ["PLANNED", "ON_TRACK", "ATTENTION", "CRITICAL", "PAUSED"];
+const activeProjectStatuses: PrismaProjectStatus[] = ["PLANNED", "ON_TRACK", "ATTENTION", "CRITICAL", "PAUSED"];
 const openIssueStatuses = ["OPEN", "IN_PROGRESS", "WAITING_DECISION"];
 const openRiskStatuses = ["OPEN", "MITIGATING", "ACCEPTED"];
 
@@ -131,6 +132,7 @@ export async function getDashboardData(): Promise<DashboardData> {
   const projects = allProjects.filter((project) => activeProjectStatuses.includes(project.status));
 
   const recentActivities = await prisma.projectActivity.findMany({
+    where: { project: { status: { in: activeProjectStatuses } } },
     orderBy: [{ updatedAt: "desc" }, { dueDate: "asc" }, { createdAt: "desc" }],
     take: 6,
     include: {
