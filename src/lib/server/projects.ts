@@ -48,6 +48,16 @@ export type ProjectDetail = Project & {
   statusReport: ProjectStatusReportSummary | null;
 };
 
+export type ProjectRisksData = {
+  project: Pick<Project, "id" | "name">;
+  risks: Risk[];
+};
+
+export type ProjectIssuesData = {
+  project: Pick<Project, "id" | "name">;
+  issues: Issue[];
+};
+
 const statusMap: Record<string, ProjectStatus> = {
   ON_TRACK: "on-track",
   ATTENTION: "attention",
@@ -159,6 +169,66 @@ function getUnitLabel(project: { type: string; unit: { name: string } | null }):
 
 function resolveProjectLookup(projectId: string): string {
   return projectAliases[projectId] ?? projectId;
+}
+
+function getProjectLookupFilters(projectId: string): Array<{ slug: string } | { id: string }> {
+  const resolvedProjectId = resolveProjectLookup(projectId);
+  const filters: Array<{ slug: string } | { id: string }> = [{ slug: resolvedProjectId }];
+
+  if (uuidPattern.test(projectId)) {
+    filters.push({ id: projectId });
+  }
+
+  return filters;
+}
+
+function mapRiskToVisual(
+  risk: {
+    id: string;
+    title: string;
+    severity: string;
+    owner: { name: string } | null;
+    goLiveImpact: string | null;
+    mitigation: string | null;
+  },
+  projectId: string,
+): Risk {
+  return {
+    id: risk.id,
+    projectId,
+    title: risk.title,
+    severity: mapRiskSeverity(risk.severity),
+    owner: risk.owner?.name ?? "PMO",
+    goLiveImpact: risk.goLiveImpact ?? "Sem impacto no go live registrado.",
+    mitigation: risk.mitigation ?? "Plano de mitigação em definição.",
+  };
+}
+
+function mapIssueToVisual(
+  issue: {
+    id: string;
+    title: string;
+    origin: string;
+    owner: { name: string } | null;
+    dueDate: Date | null;
+    impact: string | null;
+    nextAction: string | null;
+    isCritical: boolean;
+    priority: string;
+  },
+  projectId: string,
+): Issue {
+  return {
+    id: issue.id,
+    projectId,
+    title: issue.title,
+    source: mapIssueOrigin(issue.origin),
+    owner: issue.owner?.name ?? "PMO",
+    dueDate: formatShortDate(issue.dueDate),
+    impact: issue.impact ?? "Impacto em avaliação.",
+    nextAction: issue.nextAction ?? "Próxima ação em definição.",
+    critical: issue.isCritical || issue.priority === "CRITICAL",
+  };
 }
 
 export async function getProjectsForList(): Promise<Project[]> {
@@ -348,5 +418,46 @@ export async function getProjectDetail(projectId: string): Promise<ProjectDetail
           version: latestReport.version,
         }
       : null,
+  };
+}
+export async function getProjectRisks(projectId: string): Promise<ProjectRisksData | null> {
+  const project = await prisma.project.findFirst({
+    where: { OR: getProjectLookupFilters(projectId) },
+    select: {
+      name: true,
+      slug: true,
+      risks: {
+        orderBy: [{ severity: "desc" }, { createdAt: "asc" }],
+        include: { owner: { select: { name: true } } },
+      },
+    },
+  });
+
+  if (!project) return null;
+
+  return {
+    project: { id: project.slug, name: project.name },
+    risks: project.risks.map((risk) => mapRiskToVisual(risk, project.slug)),
+  };
+}
+
+export async function getProjectIssues(projectId: string): Promise<ProjectIssuesData | null> {
+  const project = await prisma.project.findFirst({
+    where: { OR: getProjectLookupFilters(projectId) },
+    select: {
+      name: true,
+      slug: true,
+      issues: {
+        orderBy: [{ isCritical: "desc" }, { dueDate: "asc" }, { createdAt: "asc" }],
+        include: { owner: { select: { name: true } } },
+      },
+    },
+  });
+
+  if (!project) return null;
+
+  return {
+    project: { id: project.slug, name: project.name },
+    issues: project.issues.map((issue) => mapIssueToVisual(issue, project.slug)),
   };
 }
