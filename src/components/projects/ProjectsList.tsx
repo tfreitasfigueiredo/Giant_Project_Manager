@@ -8,16 +8,16 @@ import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { projects } from "@/data/mock-data";
+import type { Project } from "@/data/mock-data";
 import { ProjectCard } from "./ProjectCard";
 import { ProjectStatusBadge } from "./ProjectStatusBadge";
 
-export function ProjectsList() {
+export function ProjectsList({ projects }: { projects: Project[] }) {
   const router = useRouter();
   const [status, setStatus] = useState("all");
   const [client, setClient] = useState("all");
   const clients = Array.from(new Set(projects.map((project) => project.client)));
-  const filtered = useMemo(() => projects.filter((project) => (status === "all" || project.status === status) && (client === "all" || project.client === client)), [client, status]);
+  const filtered = useMemo(() => projects.filter((project) => (status === "all" || project.status === status) && (client === "all" || project.client === client)), [client, projects, status]);
 
   return (
     <div className="flex flex-col gap-4">
