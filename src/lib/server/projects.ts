@@ -57,6 +57,30 @@ export type ProjectIssuesData = {
   project: Pick<Project, "id" | "name">;
   issues: Issue[];
 };
+export type ProjectActivitySummary = {
+  completed: number;
+  inProgress: number;
+  blocked: number;
+  planned: number;
+  total: number;
+};
+
+export type ProjectStatusReportData = {
+  project: Project;
+  title: string;
+  period: string;
+  version: number;
+  publishedAt: string;
+  executiveNarrative: string;
+  highlights: string[];
+  attentionPoints: string[];
+  nextSteps: string[];
+  risks: Risk[];
+  issues: Issue[];
+  activitySummary: ProjectActivitySummary;
+  snapshot: ProjectStatusSnapshotSummary | null;
+  sanitizedHtml: string | null;
+};
 
 const statusMap: Record<string, ProjectStatus> = {
   ON_TRACK: "on-track",
@@ -149,6 +173,21 @@ function formatShortDate(date: Date | null): string {
 
   const day = String(date.getUTCDate()).padStart(2, "0");
   return `${day} ${monthLabels[date.getUTCMonth()]}`;
+}
+function sanitizeStatusReportHtml(html: string | null): string | null {
+  if (!html) return null;
+
+  const allowedTags = new Set(["section", "h1", "h2", "h3", "p", "ul", "ol", "li", "strong", "em", "b", "i", "br"]);
+
+  return html
+    .replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, "")
+    .replace(/<style[\s\S]*?>[\s\S]*?<\/style>/gi, "")
+    .replace(/<\/?([a-zA-Z0-9-]+)(?:\s[^>]*)?>/g, (tag, tagName: string) => {
+      const normalizedTag = tagName.toLowerCase();
+      if (!allowedTags.has(normalizedTag)) return "";
+
+      return tag.startsWith("</") ? `</${normalizedTag}>` : `<${normalizedTag}>`;
+    });
 }
 
 function getClientLabel(project: { name: string; type: string; company: { name: string } }): string {
@@ -459,5 +498,130 @@ export async function getProjectIssues(projectId: string): Promise<ProjectIssues
   return {
     project: { id: project.slug, name: project.name },
     issues: project.issues.map((issue) => mapIssueToVisual(issue, project.slug)),
+  };
+}
+export async function getProjectStatusReport(projectId: string): Promise<ProjectStatusReportData | null> {
+  const project = await prisma.project.findFirst({
+    where: { OR: getProjectLookupFilters(projectId) },
+    include: {
+      company: { select: { name: true } },
+      unit: { select: { name: true } },
+      sponsor: { select: { name: true } },
+      owner: { select: { name: true } },
+      activities: {
+        orderBy: [{ orderIndex: "asc" }, { dueDate: "asc" }, { createdAt: "asc" }],
+        select: { title: true, status: true, progress: true },
+      },
+      risks: {
+        orderBy: [{ severity: "desc" }, { createdAt: "asc" }],
+        take: 4,
+        include: { owner: { select: { name: true } } },
+      },
+      issues: {
+        orderBy: [{ isCritical: "desc" }, { dueDate: "asc" }, { createdAt: "asc" }],
+        take: 4,
+        include: { owner: { select: { name: true } } },
+      },
+      decisions: { select: { status: true } },
+      nextSteps: { orderBy: { orderIndex: "asc" }, select: { title: true } },
+      statusSnapshots: { orderBy: { snapshotAt: "desc" }, take: 1 },
+      statusReports: {
+        orderBy: [{ publishedAt: "desc" }, { createdAt: "desc" }],
+        take: 1,
+        select: {
+          title: true,
+          periodStart: true,
+          periodEnd: true,
+          version: true,
+          htmlContent: true,
+          publishedAt: true,
+          createdAt: true,
+        },
+      },
+    },
+  });
+
+  if (!project) return null;
+
+  const completedActivities = project.activities.filter((activity) => activity.status === "DONE").length;
+  const activeHighRisks = project.risks.filter(
+    (risk) => risk.status !== "CLOSED" && (risk.severity === "HIGH" || risk.severity === "CRITICAL"),
+  ).length;
+  const openExecutiveIssues = project.issues.filter(
+    (issue) => issue.status !== "RESOLVED" && issue.status !== "CANCELLED" && (issue.isCritical || issue.priority === "CRITICAL"),
+  ).length;
+  const inProgressActivities = project.activities.filter((activity) => activity.status === "IN_PROGRESS").length;
+  const blockedActivities = project.activities.filter((activity) => activity.status === "BLOCKED").length;
+  const plannedActivities = project.activities.filter((activity) => activity.status === "PLANNED").length;
+  const latestSnapshot = project.statusSnapshots[0] ?? null;
+  const latestReport = project.statusReports[0] ?? null;
+  const nextSteps = project.nextSteps.map((step) => step.title);
+  const risks = project.risks.map((risk) => mapRiskToVisual(risk, project.slug));
+  const issues = project.issues.map((issue) => mapIssueToVisual(issue, project.slug));
+  const completedTitles = project.activities
+    .filter((activity) => activity.status === "DONE")
+    .map((activity) => activity.title)
+    .slice(0, 3);
+  const attentionPoints = [
+    ...risks.filter((risk) => risk.severity === "Alto").map((risk) => risk.title),
+    ...issues.filter((issue) => issue.critical).map((issue) => issue.title),
+  ].slice(0, 4);
+
+  const baseProject = {
+    id: project.slug,
+    name: project.name,
+    client: getClientLabel(project),
+    unit: getUnitLabel(project),
+    sponsor: project.sponsor?.name ?? "Sponsor",
+    owner: project.owner?.name ?? "PMO",
+    status: mapProjectStatus(latestSnapshot?.status ?? project.status),
+    phase: latestSnapshot?.phaseName ?? project.phaseName ?? "Planejamento",
+    goLive: formatDate(latestSnapshot?.goLiveDate ?? project.targetGoLive),
+    progress: latestSnapshot?.progress ?? project.progress,
+    plannedHours: Number(project.plannedHours),
+    actualHours: Number(project.actualHours),
+    executiveSummary: latestSnapshot?.summary ?? project.executiveSummary ?? "Resumo executivo em atualização.",
+    nextSteps,
+    decisionsPending: latestSnapshot?.decisionsPendingCount ?? project.decisions.filter((decision) => decision.status === "PENDING").length,
+    executiveIssues: latestSnapshot?.criticalIssuesCount ?? openExecutiveIssues,
+    highRisks: latestSnapshot?.highRisksCount ?? activeHighRisks,
+    completedActivities,
+    totalActivities: project.activities.length,
+  } satisfies Project;
+
+  return {
+    project: baseProject,
+    title: latestReport?.title ?? "Status Report Executivo",
+    period: latestReport ? `${formatDate(latestReport.periodStart)} - ${formatDate(latestReport.periodEnd)}` : "Sem período publicado",
+    version: latestReport?.version ?? 1,
+    publishedAt: formatDate(latestReport?.publishedAt ?? latestReport?.createdAt ?? null),
+    executiveNarrative: baseProject.executiveSummary,
+    highlights: completedTitles.length > 0 ? completedTitles : [`${baseProject.progress}% de avanço consolidado no projeto.`],
+    attentionPoints: attentionPoints.length > 0 ? attentionPoints : ["Sem ponto crítico registrado no último status."],
+    nextSteps,
+    risks,
+    issues,
+    activitySummary: {
+      completed: completedActivities,
+      inProgress: inProgressActivities,
+      blocked: blockedActivities,
+      planned: plannedActivities,
+      total: project.activities.length,
+    },
+    snapshot: latestSnapshot
+      ? {
+          status: mapProjectStatus(latestSnapshot.status),
+          progress: latestSnapshot.progress,
+          healthLabel: latestSnapshot.healthLabel ?? "Saúde em acompanhamento",
+          phaseName: latestSnapshot.phaseName ?? project.phaseName ?? "Planejamento",
+          goLiveDate: formatDate(latestSnapshot.goLiveDate),
+          highRisksCount: latestSnapshot.highRisksCount,
+          criticalIssuesCount: latestSnapshot.criticalIssuesCount,
+          decisionsPendingCount: latestSnapshot.decisionsPendingCount,
+          summary: latestSnapshot.summary ?? baseProject.executiveSummary,
+          snapshotAt: formatDate(latestSnapshot.snapshotAt),
+        }
+      : null,
+    sanitizedHtml: sanitizeStatusReportHtml(latestReport?.htmlContent ?? null),
   };
 }
