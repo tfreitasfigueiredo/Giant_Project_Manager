@@ -1,0 +1,45 @@
+﻿name: Delegate Codex Task
+
+on:
+  issues:
+    types:
+      - labeled
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  comment-ready-for-codex:
+    name: Comment Codex delegation instructions
+    if: github.event.label.name == 'ready-for-codex'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Comment on issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issue = context.payload.issue;
+            const body = [
+              '@codex',
+              '',
+              'Esta issue foi marcada como `ready-for-codex`.',
+              '',
+              'Leia a issue completa, siga o `AGENTS.md` e os documentos em `docs/product`.',
+              '',
+              'Regras obrigatórias:',
+              '- Crie uma branch específica para a tarefa.',
+              '- Não faça merge automático.',
+              '- Não altere banco, schema, migrations ou seed sem autorização explícita na issue.',
+              '- Não inclua `.env`, tokens, secrets ou credenciais.',
+              '- Ao final, abra PR e informe arquivos alterados, comandos rodados, rotas testadas e limitações.',
+              '',
+              'Fluxo piloto: validar se este comentário dispara corretamente o Codex antes de usar em demandas reais.'
+            ].join('\n');
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issue.number,
+              body,
+            });
