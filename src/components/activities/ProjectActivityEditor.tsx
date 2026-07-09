@@ -11,14 +11,8 @@ import {
   updateProjectActivity,
 } from "@/app/(app)/projects/[projectId]/actions";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog } from "@/components/ui/dialog";
+import { DialogFormBody, DialogFormContent, DialogFormFooter, DialogFormHeader } from "@/components/ui/dialog-form-layout";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -159,18 +153,14 @@ function ProjectActivityEditorContent({
   }
 
   return (
-      <DialogContent className="flex max-h-[92vh] flex-col overflow-hidden border-slate-200 bg-white p-0 shadow-[0_24px_70px_rgba(15,23,42,0.18)] sm:max-w-3xl">
-        <DialogHeader className="shrink-0 border-b border-slate-100 bg-white p-5 pr-14 sm:p-6 sm:pr-16">
-          <DialogTitle className="text-xl font-bold text-slate-950">
-            {isCreate ? "Nova atividade do projeto" : "Editar atividade do projeto"}
-          </DialogTitle>
-          <DialogDescription className="text-sm leading-6 text-slate-600">
-            Atualize apenas os dados operacionais da atividade. Progresso de fase e projeto continuam sem consolidação automática.
-          </DialogDescription>
-        </DialogHeader>
+      <DialogFormContent>
+        <DialogFormHeader
+          title={isCreate ? "Nova atividade do projeto" : "Editar atividade do projeto"}
+          description="Atualize apenas os dados operacionais da atividade. Progresso de fase e projeto continuam sem consolidação automática."
+        />
 
         <form action={formAction} className="flex min-h-0 flex-1 flex-col">
-          <div className="flex-1 overflow-y-auto p-5 sm:p-6">
+          <DialogFormBody>
             <input type="hidden" name="projectId" value={projectId} />
             {!isCreate ? <input type="hidden" name="activityId" value={activity?.id ?? ""} /> : null}
 
@@ -320,12 +310,12 @@ function ProjectActivityEditorContent({
               <FieldError errors={state.fieldErrors?.orderIndex} />
             </div>
           </div>
-          </div>
+          </DialogFormBody>
 
-          <DialogFooter className="mx-0 mb-0 shrink-0 rounded-none border-t border-slate-100 bg-white p-5 sm:p-6">
+          <DialogFormFooter>
             <SubmitButton mode={mode} />
-          </DialogFooter>
+          </DialogFormFooter>
         </form>
-      </DialogContent>
+      </DialogFormContent>
   );
 }

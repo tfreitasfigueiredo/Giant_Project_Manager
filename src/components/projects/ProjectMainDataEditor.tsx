@@ -7,15 +7,8 @@ import { useRouter } from "next/navigation";
 
 import { updateProjectMainData, type UpdateProjectMainDataState } from "@/app/(app)/projects/[projectId]/actions";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { Dialog, DialogTrigger } from "@/components/ui/dialog";
+import { DialogFormBody, DialogFormContent, DialogFormFooter, DialogFormHeader } from "@/components/ui/dialog-form-layout";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -93,16 +86,14 @@ export function ProjectMainDataEditor({ project, options }: ProjectMainDataEdito
           Editar projeto
         </Button>
       </DialogTrigger>
-      <DialogContent className="flex max-h-[92vh] flex-col overflow-hidden border-slate-200 bg-white p-0 shadow-[0_24px_70px_rgba(15,23,42,0.18)] sm:max-w-3xl">
-        <DialogHeader className="shrink-0 border-b border-slate-100 bg-white p-5 pr-14 sm:p-6 sm:pr-16">
-          <DialogTitle className="text-xl font-bold text-slate-950">Editar dados principais</DialogTitle>
-          <DialogDescription className="text-sm leading-6 text-slate-600">
-            Atualize apenas os campos executivos do projeto. Fases, atividades, riscos e pendências continuam fora desta etapa.
-          </DialogDescription>
-        </DialogHeader>
+      <DialogFormContent>
+        <DialogFormHeader
+          title="Editar dados principais"
+          description="Atualize apenas os campos executivos do projeto. Fases, atividades, riscos e pendências continuam fora desta etapa."
+        />
 
         <form action={formAction} className="flex min-h-0 flex-1 flex-col">
-          <div className="flex-1 overflow-y-auto p-5 sm:p-6">
+          <DialogFormBody>
             <input type="hidden" name="projectId" value={project.slug} />
 
             {state.message ? (
@@ -236,13 +227,13 @@ export function ProjectMainDataEditor({ project, options }: ProjectMainDataEdito
               <FieldError errors={state.fieldErrors?.sponsorId} />
             </div>
           </div>
-          </div>
+          </DialogFormBody>
 
-          <DialogFooter className="mx-0 mb-0 shrink-0 rounded-none border-t border-slate-100 bg-white p-5 sm:p-6">
+          <DialogFormFooter>
             <SubmitButton />
-          </DialogFooter>
+          </DialogFormFooter>
         </form>
-      </DialogContent>
+      </DialogFormContent>
     </Dialog>
   );
 }

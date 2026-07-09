@@ -15,7 +15,7 @@ export default async function StatusReportPage({ params }: { params: Promise<{ p
   }
 
   return (
-    <PageContainer title="Status report" description={`${report.project.name} · versão web responsiva do report executivo.`}>
+    <PageContainer title="Status report" description={`${report.project.name} · versão web responsiva do report executivo.`} showPageHeader={false}>
       <StatusReportView report={report} />
     </PageContainer>
   );
