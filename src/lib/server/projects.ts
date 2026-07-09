@@ -547,13 +547,33 @@ export async function getProjectActivitiesManagement(projectId: string): Promise
       tenantId: true,
       name: true,
       slug: true,
+      tenant: {
+        select: {
+          users: {
+            where: { status: "ACTIVE" },
+            orderBy: { name: "asc" },
+            select: { id: true, name: true },
+          },
+        },
+      },
       phases: {
         orderBy: { orderIndex: "asc" },
         select: { id: true, name: true, orderIndex: true },
       },
       activities: {
         orderBy: [{ orderIndex: "asc" }, { dueDate: "asc" }, { createdAt: "asc" }],
-        include: {
+        select: {
+          id: true,
+          title: true,
+          description: true,
+          status: true,
+          priority: true,
+          dueDate: true,
+          completedAt: true,
+          progress: true,
+          orderIndex: true,
+          phaseId: true,
+          ownerId: true,
           phase: { select: { name: true, orderIndex: true } },
           owner: { select: { name: true } },
         },
@@ -562,12 +582,6 @@ export async function getProjectActivitiesManagement(projectId: string): Promise
   });
 
   if (!project) return null;
-
-  const users = await prisma.appUser.findMany({
-    where: { tenantId: project.tenantId, status: "ACTIVE" },
-    orderBy: { name: "asc" },
-    select: { id: true, name: true },
-  });
 
   const sortedActivities = [...project.activities].sort((left, right) => {
     const phaseDiff = (left.phase?.orderIndex ?? Number.MAX_SAFE_INTEGER) - (right.phase?.orderIndex ?? Number.MAX_SAFE_INTEGER);
@@ -599,7 +613,7 @@ export async function getProjectActivitiesManagement(projectId: string): Promise
         orderIndex: phase.orderIndex,
         nextOrderIndex: nextOrderByPhase.get(phase.id) ?? 0,
       })),
-      users,
+      users: project.tenant.users,
     },
   };
 }
