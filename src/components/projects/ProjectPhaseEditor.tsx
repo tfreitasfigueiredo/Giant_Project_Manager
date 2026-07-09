@@ -232,7 +232,7 @@ export function ProjectPhaseEditor({ mode, projectId, phase, nextOrderIndex = 1 
           </div>
           </div>
 
-          <DialogFooter className="shrink-0 border-t border-slate-100 bg-white p-5 sm:p-6">
+          <DialogFooter className="mx-0 mb-0 shrink-0 rounded-none border-t border-slate-100 bg-white p-5 sm:p-6">
             <SubmitButton mode={mode} />
           </DialogFooter>
         </form>
