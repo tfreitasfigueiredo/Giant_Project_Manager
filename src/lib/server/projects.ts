@@ -229,7 +229,8 @@ function sanitizeStatusReportHtml(html: string | null): string | null {
       const normalizedTag = tagName.toLowerCase();
       if (!allowedTags.has(normalizedTag)) return "";
 
-      return tag.startsWith("</") ? `</${normalizedTag}>` : `<${normalizedTag}>`;
+      const safeTag = normalizedTag === "h1" ? "h2" : normalizedTag;
+      return tag.startsWith("</") ? `</${safeTag}>` : `<${safeTag}>`;
     });
 }
 
