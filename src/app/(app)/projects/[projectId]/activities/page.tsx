@@ -1,11 +1,22 @@
-import { ActivityCard } from "@/components/activities/ActivityCard";
-import { ActivityTable } from "@/components/activities/ActivityTable";
+import { notFound } from "next/navigation";
+
+import { ProjectActivitiesManagement } from "@/components/activities/ProjectActivitiesManagement";
 import { PageContainer } from "@/components/layout/PageContainer";
-import { getProject, getProjectActivities } from "@/data/mock-data";
+import { getProjectActivitiesManagement } from "@/lib/server/projects";
+
+export const dynamic = "force-dynamic";
 
 export default async function ActivitiesPage({ params }: { params: Promise<{ projectId: string }> }) {
   const { projectId } = await params;
-  const project = getProject(projectId);
-  const activities = getProjectActivities(project.id);
-  return <PageContainer title="Atividades" description={`${project.name} · status, responsável, prazo, progresso e prioridade.`}><div className="grid gap-4 lg:hidden">{activities.map((activity) => <ActivityCard key={activity.id} activity={activity} />)}</div><ActivityTable activities={activities} /></PageContainer>;
+  const data = await getProjectActivitiesManagement(projectId);
+
+  if (!data) {
+    notFound();
+  }
+
+  return (
+    <PageContainer title="Atividades" description={`${data.project.name} · status, responsável, prazo, progresso e prioridade.`}>
+      <ProjectActivitiesManagement data={data} />
+    </PageContainer>
+  );
 }

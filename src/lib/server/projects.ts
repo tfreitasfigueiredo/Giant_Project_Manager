@@ -1,10 +1,8 @@
-import "server-only";
+﻿import "server-only";
 
+import type { Activity, ActivityPriority, ActivityStatus, ProjectActivitiesManagementData } from "@/types/project-activities";
 import type {
-  Activity,
-  ActivityStatus,
   Issue,
-  Priority,
   Project,
   ProjectStatus,
   Risk,
@@ -98,14 +96,14 @@ const activityStatusMap: Record<string, ActivityStatus> = {
   IN_PROGRESS: "in-progress",
   BLOCKED: "blocked",
   PLANNED: "planned",
-  CANCELLED: "blocked",
+  CANCELLED: "cancelled",
 };
 
-const priorityMap: Record<string, Priority> = {
+const priorityMap: Record<string, ActivityPriority> = {
   LOW: "Baixa",
   MEDIUM: "Média",
   HIGH: "Alta",
-  CRITICAL: "Alta",
+  CRITICAL: "Crítica",
 };
 
 const riskSeverityMap: Record<string, RiskSeverity> = {
@@ -119,17 +117,17 @@ const issueOriginMap: Record<string, string> = {
   CLIENT: "Cliente",
   INTERNAL: "Interna",
   PMO: "PMO",
-  OPERATIONS: "Operações",
+  OPERATIONS: "OperaÃ§Ãµes",
   TECHNOLOGY: "Tecnologia",
   COMMERCIAL: "Comercial",
   EXECUTIVE: "Executiva",
 };
 
 const phaseStatusMap: Record<string, string> = {
-  NOT_STARTED: "Não iniciada",
+  NOT_STARTED: "NÃ£o iniciada",
   IN_PROGRESS: "Em andamento",
   BLOCKED: "Bloqueada",
-  DONE: "Concluída",
+  DONE: "ConcluÃ­da",
   CANCELLED: "Cancelada",
 };
 
@@ -150,7 +148,7 @@ function mapActivityStatus(status: string): ActivityStatus {
   return activityStatusMap[status] ?? "planned";
 }
 
-function mapPriority(priority: string): Priority {
+function mapPriority(priority: string): ActivityPriority {
   return priorityMap[priority] ?? "Média";
 }
 
@@ -179,6 +177,46 @@ function formatShortDate(date: Date | null): string {
   const day = String(date.getUTCDate()).padStart(2, "0");
   return `${day} ${monthLabels[date.getUTCMonth()]}`;
 }
+
+function mapActivityToVisual(
+  activity: {
+    id: string;
+    title: string;
+    description: string | null;
+    status: string;
+    priority: string;
+    dueDate: Date | null;
+    completedAt: Date | null;
+    progress: number;
+    orderIndex: number;
+    phaseId: string | null;
+    ownerId: string | null;
+    phase?: { name: string } | null;
+    owner?: { name: string } | null;
+  },
+  projectSlug: string,
+): Activity {
+  return {
+    id: activity.id,
+    projectId: projectSlug,
+    title: activity.title,
+    description: activity.description ?? "",
+    phase: activity.phase?.name ?? "Sem fase",
+    phaseId: activity.phaseId ?? "",
+    owner: activity.owner?.name ?? "Sem responsável",
+    ownerId: activity.ownerId ?? "",
+    dueDate: formatShortDate(activity.dueDate),
+    dueDateInput: formatDateInput(activity.dueDate),
+    completedAt: formatDateInput(activity.completedAt),
+    status: mapActivityStatus(activity.status),
+    statusCode: activity.status as Activity["statusCode"],
+    progress: activity.progress,
+    priority: mapPriority(activity.priority),
+    priorityCode: activity.priority as Activity["priorityCode"],
+    orderIndex: activity.orderIndex,
+  };
+}
+
 function sanitizeStatusReportHtml(html: string | null): string | null {
   if (!html) return null;
 
@@ -204,7 +242,7 @@ function getClientLabel(project: { name: string; type: string; company: { name: 
 }
 
 function getUnitLabel(project: { type: string; unit: { name: string } | null }): string {
-  if (project.type === "IMPLEMENTATION") return "Operações";
+  if (project.type === "IMPLEMENTATION") return "OperaÃ§Ãµes";
   if (project.type === "CONTROL_TOWER") return "Control Tower";
   if (project.type === "DATA_PRODUCT") return "Planejamento";
 
@@ -244,7 +282,7 @@ function mapRiskToVisual(
     severity: mapRiskSeverity(risk.severity),
     owner: risk.owner?.name ?? "PMO",
     goLiveImpact: risk.goLiveImpact ?? "Sem impacto no go live registrado.",
-    mitigation: risk.mitigation ?? "Plano de mitigação em definição.",
+    mitigation: risk.mitigation ?? "Plano de mitigaÃ§Ã£o em definiÃ§Ã£o.",
   };
 }
 
@@ -269,8 +307,8 @@ function mapIssueToVisual(
     source: mapIssueOrigin(issue.origin),
     owner: issue.owner?.name ?? "PMO",
     dueDate: formatShortDate(issue.dueDate),
-    impact: issue.impact ?? "Impacto em avaliação.",
-    nextAction: issue.nextAction ?? "Próxima ação em definição.",
+    impact: issue.impact ?? "Impacto em avaliaÃ§Ã£o.",
+    nextAction: issue.nextAction ?? "PrÃ³xima aÃ§Ã£o em definiÃ§Ã£o.",
     critical: issue.isCritical || issue.priority === "CRITICAL",
   };
 }
@@ -313,7 +351,7 @@ export async function getProjectsForList(): Promise<Project[]> {
       progress: project.progress,
       plannedHours: Number(project.plannedHours),
       actualHours: Number(project.actualHours),
-      executiveSummary: project.executiveSummary ?? "Resumo executivo em atualização.",
+      executiveSummary: project.executiveSummary ?? "Resumo executivo em atualizaÃ§Ã£o.",
       nextSteps: project.nextSteps.map((step) => step.title),
       decisionsPending: project.decisions.filter((decision) => decision.status === "PENDING").length,
       executiveIssues: openExecutiveIssues,
@@ -389,7 +427,7 @@ export async function getProjectDetail(projectId: string): Promise<ProjectDetail
     progress: project.progress,
     plannedHours: Number(project.plannedHours),
     actualHours: Number(project.actualHours),
-    executiveSummary: project.executiveSummary ?? "Resumo executivo em atualização.",
+    executiveSummary: project.executiveSummary ?? "Resumo executivo em atualizaÃ§Ã£o.",
     nextSteps: project.nextSteps.map((step) => step.title),
     decisionsPending: project.decisions.filter((decision) => decision.status === "PENDING").length,
     executiveIssues: openExecutiveIssues,
@@ -415,17 +453,7 @@ export async function getProjectDetail(projectId: string): Promise<ProjectDetail
       dueDate: formatDateInput(phase.dueDate),
       completedAt: formatDateInput(phase.completedAt),
     })),
-    activities: project.activities.map((activity) => ({
-      id: activity.id,
-      projectId: project.slug,
-      title: activity.title,
-      phase: activity.phase?.name ?? project.phaseName ?? "Sem fase",
-      owner: activity.owner?.name ?? "PMO",
-      dueDate: formatShortDate(activity.dueDate),
-      status: mapActivityStatus(activity.status),
-      progress: activity.progress,
-      priority: mapPriority(activity.priority),
-    })),
+    activities: project.activities.map((activity) => mapActivityToVisual(activity, project.slug)),
     risks: project.risks.map((risk) => ({
       id: risk.id,
       projectId: project.slug,
@@ -433,7 +461,7 @@ export async function getProjectDetail(projectId: string): Promise<ProjectDetail
       severity: mapRiskSeverity(risk.severity),
       owner: risk.owner?.name ?? "PMO",
       goLiveImpact: risk.goLiveImpact ?? "Sem impacto no go live registrado.",
-      mitigation: risk.mitigation ?? "Plano de mitigação em definição.",
+      mitigation: risk.mitigation ?? "Plano de mitigaÃ§Ã£o em definiÃ§Ã£o.",
     })),
     issues: project.issues.map((issue) => ({
       id: issue.id,
@@ -442,15 +470,15 @@ export async function getProjectDetail(projectId: string): Promise<ProjectDetail
       source: mapIssueOrigin(issue.origin),
       owner: issue.owner?.name ?? "PMO",
       dueDate: formatShortDate(issue.dueDate),
-      impact: issue.impact ?? "Impacto em avaliação.",
-      nextAction: issue.nextAction ?? "Próxima ação em definição.",
+      impact: issue.impact ?? "Impacto em avaliaÃ§Ã£o.",
+      nextAction: issue.nextAction ?? "PrÃ³xima aÃ§Ã£o em definiÃ§Ã£o.",
       critical: issue.isCritical || issue.priority === "CRITICAL",
     })),
     statusSnapshot: latestSnapshot
       ? {
           status: mapProjectStatus(latestSnapshot.status),
           progress: latestSnapshot.progress,
-          healthLabel: latestSnapshot.healthLabel ?? "Saúde em acompanhamento",
+          healthLabel: latestSnapshot.healthLabel ?? "SaÃºde em acompanhamento",
           phaseName: latestSnapshot.phaseName ?? project.phaseName ?? "Planejamento",
           goLiveDate: formatDate(latestSnapshot.goLiveDate),
           highRisksCount: latestSnapshot.highRisksCount,
@@ -510,6 +538,72 @@ export async function getProjectIssues(projectId: string): Promise<ProjectIssues
     issues: project.issues.map((issue) => mapIssueToVisual(issue, project.slug)),
   };
 }
+
+export async function getProjectActivitiesManagement(projectId: string): Promise<ProjectActivitiesManagementData | null> {
+  const project = await prisma.project.findFirst({
+    where: { OR: getProjectLookupFilters(projectId) },
+    select: {
+      id: true,
+      tenantId: true,
+      name: true,
+      slug: true,
+      phases: {
+        orderBy: { orderIndex: "asc" },
+        select: { id: true, name: true, orderIndex: true },
+      },
+      activities: {
+        orderBy: [{ orderIndex: "asc" }, { dueDate: "asc" }, { createdAt: "asc" }],
+        include: {
+          phase: { select: { name: true, orderIndex: true } },
+          owner: { select: { name: true } },
+        },
+      },
+    },
+  });
+
+  if (!project) return null;
+
+  const users = await prisma.appUser.findMany({
+    where: { tenantId: project.tenantId, status: "ACTIVE" },
+    orderBy: { name: "asc" },
+    select: { id: true, name: true },
+  });
+
+  const sortedActivities = [...project.activities].sort((left, right) => {
+    const phaseDiff = (left.phase?.orderIndex ?? Number.MAX_SAFE_INTEGER) - (right.phase?.orderIndex ?? Number.MAX_SAFE_INTEGER);
+    if (phaseDiff !== 0) return phaseDiff;
+
+    const orderDiff = left.orderIndex - right.orderIndex;
+    if (orderDiff !== 0) return orderDiff;
+
+    return (left.dueDate?.getTime() ?? 0) - (right.dueDate?.getTime() ?? 0);
+  });
+
+  const nextOrderByPhase = new Map(project.phases.map((phase) => [phase.id, 0]));
+  for (const activity of project.activities) {
+    if (!activity.phaseId) continue;
+    const currentNextOrder = nextOrderByPhase.get(activity.phaseId) ?? 0;
+    nextOrderByPhase.set(activity.phaseId, Math.max(currentNextOrder, activity.orderIndex + 1));
+  }
+
+  return {
+    project: {
+      id: project.slug,
+      name: project.name,
+    },
+    activities: sortedActivities.map((activity) => mapActivityToVisual(activity, project.slug)),
+    options: {
+      phases: project.phases.map((phase) => ({
+        id: phase.id,
+        name: phase.name,
+        orderIndex: phase.orderIndex,
+        nextOrderIndex: nextOrderByPhase.get(phase.id) ?? 0,
+      })),
+      users,
+    },
+  };
+}
+
 export async function getProjectStatusReport(projectId: string): Promise<ProjectStatusReportData | null> {
   const project = await prisma.project.findFirst({
     where: { OR: getProjectLookupFilters(projectId) },
@@ -590,7 +684,7 @@ export async function getProjectStatusReport(projectId: string): Promise<Project
     progress: latestSnapshot?.progress ?? project.progress,
     plannedHours: Number(project.plannedHours),
     actualHours: Number(project.actualHours),
-    executiveSummary: latestSnapshot?.summary ?? project.executiveSummary ?? "Resumo executivo em atualização.",
+    executiveSummary: latestSnapshot?.summary ?? project.executiveSummary ?? "Resumo executivo em atualizaÃ§Ã£o.",
     nextSteps,
     decisionsPending: latestSnapshot?.decisionsPendingCount ?? project.decisions.filter((decision) => decision.status === "PENDING").length,
     executiveIssues: latestSnapshot?.criticalIssuesCount ?? openExecutiveIssues,
@@ -602,12 +696,12 @@ export async function getProjectStatusReport(projectId: string): Promise<Project
   return {
     project: baseProject,
     title: latestReport?.title ?? "Status Report Executivo",
-    period: latestReport ? `${formatDate(latestReport.periodStart)} - ${formatDate(latestReport.periodEnd)}` : "Sem período publicado",
+    period: latestReport ? `${formatDate(latestReport.periodStart)} - ${formatDate(latestReport.periodEnd)}` : "Sem perÃ­odo publicado",
     version: latestReport?.version ?? 1,
     publishedAt: formatDate(latestReport?.publishedAt ?? latestReport?.createdAt ?? null),
     executiveNarrative: baseProject.executiveSummary,
-    highlights: completedTitles.length > 0 ? completedTitles : [`${baseProject.progress}% de avanço consolidado no projeto.`],
-    attentionPoints: attentionPoints.length > 0 ? attentionPoints : ["Sem ponto crítico registrado no último status."],
+    highlights: completedTitles.length > 0 ? completedTitles : [`${baseProject.progress}% de avanÃ§o consolidado no projeto.`],
+    attentionPoints: attentionPoints.length > 0 ? attentionPoints : ["Sem ponto crÃ­tico registrado no Ãºltimo status."],
     nextSteps,
     risks: displayRisks,
     issues: displayIssues,
@@ -622,7 +716,7 @@ export async function getProjectStatusReport(projectId: string): Promise<Project
       ? {
           status: mapProjectStatus(latestSnapshot.status),
           progress: latestSnapshot.progress,
-          healthLabel: latestSnapshot.healthLabel ?? "Saúde em acompanhamento",
+          healthLabel: latestSnapshot.healthLabel ?? "SaÃºde em acompanhamento",
           phaseName: latestSnapshot.phaseName ?? project.phaseName ?? "Planejamento",
           goLiveDate: formatDate(latestSnapshot.goLiveDate),
           highRisksCount: latestSnapshot.highRisksCount,
@@ -727,3 +821,5 @@ export async function getProjectMainDataEditor(projectId: string): Promise<Proje
     },
   };
 }
+
+
