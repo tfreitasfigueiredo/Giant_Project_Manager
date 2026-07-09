@@ -15,9 +15,14 @@ import { prisma } from "./prisma";
 export type ProjectPhaseSummary = {
   id: string;
   name: string;
+  description: string;
   status: string;
+  statusCode: string;
   progress: number;
   orderIndex: number;
+  startDate: string;
+  dueDate: string;
+  completedAt: string;
 };
 
 export type ProjectStatusSnapshotSummary = {
@@ -401,9 +406,14 @@ export async function getProjectDetail(projectId: string): Promise<ProjectDetail
     phases: project.phases.map((phase) => ({
       id: phase.id,
       name: phase.name,
+      description: phase.description ?? "",
       status: mapPhaseStatus(phase.status),
+      statusCode: phase.status,
       progress: phase.progress,
       orderIndex: phase.orderIndex,
+      startDate: formatDateInput(phase.startDate),
+      dueDate: formatDateInput(phase.dueDate),
+      completedAt: formatDateInput(phase.completedAt),
     })),
     activities: project.activities.map((activity) => ({
       id: activity.id,
