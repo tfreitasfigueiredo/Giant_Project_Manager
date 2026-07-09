@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useMemo, useState } from "react";
+import { useActionState, useCallback, useEffect, useMemo, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { Pencil, Plus, Save } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -73,6 +73,9 @@ export function ProjectActivityEditor({ mode, projectId, activity, options }: Pr
   const [open, setOpen] = useState(false);
   const [formKey, setFormKey] = useState(0);
   const isCreate = mode === "create";
+  const closeModal = useCallback(() => {
+    setOpen(false);
+  }, []);
 
   function handleOpenChange(nextOpen: boolean) {
     if (nextOpen && isCreate) {
@@ -111,7 +114,7 @@ export function ProjectActivityEditor({ mode, projectId, activity, options }: Pr
         projectId={projectId}
         activity={activity}
         options={options}
-        closeModal={() => setOpen(false)}
+        closeModal={closeModal}
       />
     </Dialog>
   );
