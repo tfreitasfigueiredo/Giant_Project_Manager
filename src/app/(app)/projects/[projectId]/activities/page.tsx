@@ -15,7 +15,7 @@ export default async function ActivitiesPage({ params }: { params: Promise<{ pro
   }
 
   return (
-    <PageContainer title="Atividades" description={`${data.project.name} · status, responsável, prazo, progresso e prioridade.`}>
+    <PageContainer title="Atividades" description="Status, responsável, prazo, progresso e prioridade." showPageHeader={false}>
       <ProjectActivitiesManagement data={data} />
     </PageContainer>
   );

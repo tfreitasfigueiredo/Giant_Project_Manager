@@ -93,28 +93,29 @@ export function ProjectMainDataEditor({ project, options }: ProjectMainDataEdito
           Editar projeto
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-h-[92vh] overflow-y-auto border-slate-200 bg-white p-0 shadow-[0_24px_70px_rgba(15,23,42,0.18)] sm:max-w-3xl">
-        <DialogHeader className="border-b border-slate-100 bg-slate-50/80 p-5 sm:p-6">
+      <DialogContent className="flex max-h-[92vh] flex-col overflow-hidden border-slate-200 bg-white p-0 shadow-[0_24px_70px_rgba(15,23,42,0.18)] sm:max-w-3xl">
+        <DialogHeader className="shrink-0 border-b border-slate-100 bg-white p-5 pr-14 sm:p-6 sm:pr-16">
           <DialogTitle className="text-xl font-bold text-slate-950">Editar dados principais</DialogTitle>
           <DialogDescription className="text-sm leading-6 text-slate-600">
             Atualize apenas os campos executivos do projeto. Fases, atividades, riscos e pendências continuam fora desta etapa.
           </DialogDescription>
         </DialogHeader>
 
-        <form action={formAction} className="flex flex-col gap-5 p-5 sm:p-6">
-          <input type="hidden" name="projectId" value={project.slug} />
+        <form action={formAction} className="flex min-h-0 flex-1 flex-col">
+          <div className="flex-1 overflow-y-auto p-5 sm:p-6">
+            <input type="hidden" name="projectId" value={project.slug} />
 
-          {state.message ? (
-            <div
-              className={
-                state.status === "success"
-                  ? "rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700"
-                  : "rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700"
-              }
-            >
-              {state.message}
-            </div>
-          ) : null}
+            {state.message ? (
+              <div
+                className={
+                  state.status === "success"
+                    ? "mb-5 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700"
+                    : "mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700"
+                }
+              >
+                {state.message}
+              </div>
+            ) : null}
 
           <div className="grid gap-4 md:grid-cols-2">
             <div className="flex flex-col gap-2 md:col-span-2">
@@ -235,8 +236,9 @@ export function ProjectMainDataEditor({ project, options }: ProjectMainDataEdito
               <FieldError errors={state.fieldErrors?.sponsorId} />
             </div>
           </div>
+          </div>
 
-          <DialogFooter className="-mx-5 -mb-5 border-t border-slate-100 bg-slate-50/80 p-5 sm:-mx-6 sm:-mb-6 sm:p-6">
+          <DialogFooter className="shrink-0 border-t border-slate-100 bg-white p-5 sm:p-6">
             <SubmitButton />
           </DialogFooter>
         </form>
