@@ -82,6 +82,12 @@ const createProjectActivitySchema = projectActivityBaseSchema;
 const updateProjectActivitySchema = projectActivityBaseSchema.extend({
   activityId: z.string().uuid("Atividade inválida."),
 });
+const quickUpdateProjectActivitySchema = z.object({
+  projectId: z.string().min(1, "Projeto inválido."),
+  activityId: z.string().uuid("Atividade inválida."),
+  status: z.enum(projectActivityStatuses, { error: "Selecione um status válido." }),
+  progress: z.coerce.number().int("Use um número inteiro.").min(0, "O progresso mínimo é 0%.").max(100, "O progresso máximo é 100%."),
+});
 
 function normalizeOptionalUuid(value: string | undefined): string | null {
   if (!value || value === "none") return null;
@@ -669,6 +675,66 @@ export async function updateProjectActivity(
         completedAt: completion.completedAt,
         progress: completion.progress,
         orderIndex: parsed.data.orderIndex,
+      },
+    });
+
+    revalidateProjectActivityPaths(project.slug);
+
+    return { status: "success", message: "Atividade atualizada com sucesso." };
+  } catch (error) {
+    return {
+      status: "error",
+      message: error instanceof Error ? error.message : "Não foi possível atualizar a atividade.",
+    };
+  }
+}
+
+export async function quickUpdateProjectActivity(
+  _previousState: ProjectActivityActionState,
+  formData: FormData,
+): Promise<ProjectActivityActionState> {
+  const payload = Object.fromEntries(formData.entries());
+  const parsed = quickUpdateProjectActivitySchema.safeParse(payload);
+
+  if (!parsed.success) {
+    return {
+      status: "error",
+      message: "Revise o status e o progresso antes de salvar.",
+      fieldErrors: parsed.error.flatten().fieldErrors,
+    };
+  }
+
+  try {
+    const project = await findProjectForPhaseAction(parsed.data.projectId);
+
+    if (!project) {
+      return { status: "error", message: "Projeto não encontrado para atualizar atividade." };
+    }
+
+    const activity = await prisma.projectActivity.findFirst({
+      where: { id: parsed.data.activityId, projectId: project.id, tenantId: project.tenantId },
+      select: { id: true, completedAt: true },
+    });
+
+    if (!activity) {
+      return { status: "error", message: "Atividade não encontrada neste projeto." };
+    }
+
+    const completion = normalizeActivityCompletion(parsed.data.status, parsed.data.progress, activity.completedAt);
+    if (completion.status === "error") {
+      return {
+        status: "error",
+        message: "Progresso 100% só pode ser salvo com status Concluída.",
+        fieldErrors: completion.fieldErrors,
+      };
+    }
+
+    await prisma.projectActivity.update({
+      where: { id: parsed.data.activityId },
+      data: {
+        status: parsed.data.status as ProjectActivityStatus,
+        progress: completion.progress,
+        completedAt: completion.completedAt,
       },
     });
 
