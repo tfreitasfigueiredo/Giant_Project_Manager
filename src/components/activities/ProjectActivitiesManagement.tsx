@@ -6,6 +6,7 @@ import { Ban, CalendarClock, CheckCircle2, ListChecks, PlayCircle } from "lucide
 import { ActivityCard } from "@/components/activities/ActivityCard";
 import { ActivityTable } from "@/components/activities/ActivityTable";
 import { ProjectActivityEditor } from "@/components/activities/ProjectActivityEditor";
+import { ProjectActivityQuickUpdate } from "@/components/activities/ProjectActivityQuickUpdate";
 import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
@@ -193,7 +194,12 @@ export function ProjectActivitiesManagement({ data }: { data: ProjectActivitiesM
           <ActivityCard
             key={activity.id}
             activity={activity}
-            action={<ProjectActivityEditor mode="edit" projectId={data.project.id} activity={activity} options={activityEditorOptions} />}
+            action={
+              <div className="flex flex-col gap-2 sm:flex-row">
+                <ProjectActivityQuickUpdate projectId={data.project.id} activity={activity} />
+                <ProjectActivityEditor mode="edit" projectId={data.project.id} activity={activity} options={activityEditorOptions} />
+              </div>
+            }
           />
         ))}
       </div>
@@ -201,7 +207,10 @@ export function ProjectActivitiesManagement({ data }: { data: ProjectActivitiesM
       <ActivityTable
         activities={filteredActivities}
         renderAction={(activity) => (
-          <ProjectActivityEditor mode="edit" projectId={data.project.id} activity={activity} options={activityEditorOptions} />
+          <div className="flex justify-end gap-2">
+            <ProjectActivityQuickUpdate projectId={data.project.id} activity={activity} />
+            <ProjectActivityEditor mode="edit" projectId={data.project.id} activity={activity} options={activityEditorOptions} />
+          </div>
         )}
       />
 
