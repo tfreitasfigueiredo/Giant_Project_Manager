@@ -7,12 +7,13 @@ import { IssueCard } from "@/components/issues/IssueCard";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { ProjectHealthCard } from "@/components/projects/ProjectHealthCard";
 import { ProjectProgressCard } from "@/components/projects/ProjectProgressCard";
+import { ProjectMainDataEditor } from "@/components/projects/ProjectMainDataEditor";
 import { ProjectStatusBadge } from "@/components/projects/ProjectStatusBadge";
 import { RiskCard } from "@/components/risks/RiskCard";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { getProjectDetail } from "@/lib/server/projects";
+import { getProjectDetail, getProjectMainDataEditor } from "@/lib/server/projects";
 
 export const dynamic = "force-dynamic";
 
@@ -26,14 +27,26 @@ const projectSections = [
 
 export default async function ProjectDetailPage({ params }: { params: Promise<{ projectId: string }> }) {
   const { projectId } = await params;
-  const project = await getProjectDetail(projectId);
+  const [project, editorData] = await Promise.all([
+    getProjectDetail(projectId),
+    getProjectMainDataEditor(projectId),
+  ]);
 
   if (!project) {
     notFound();
   }
 
   return (
-    <PageContainer title={project.name} description={project.executiveSummary} action={<ProjectStatusBadge status={project.status} />}>
+    <PageContainer
+      title={project.name}
+      description={project.executiveSummary}
+      action={
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+          <ProjectStatusBadge status={project.status} />
+          {editorData ? <ProjectMainDataEditor project={editorData.project} options={editorData.options} /> : null}
+        </div>
+      }
+    >
       <div className="grid gap-4 xl:grid-cols-3">
         <ProjectHealthCard project={project} />
         <ProjectProgressCard project={project} />
