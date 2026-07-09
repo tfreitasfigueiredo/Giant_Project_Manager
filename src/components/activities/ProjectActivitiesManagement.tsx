@@ -20,10 +20,18 @@ type FilterState = {
 
 const allValue = "all";
 
+function getLocalDateKey(date = new Date()) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+}
+
 function isOverdue(activity: Activity) {
   if (!activity.dueDateInput || activity.status === "done" || activity.status === "cancelled") return false;
 
-  const today = new Date().toISOString().slice(0, 10);
+  const today = getLocalDateKey();
   return activity.dueDateInput < today;
 }
 

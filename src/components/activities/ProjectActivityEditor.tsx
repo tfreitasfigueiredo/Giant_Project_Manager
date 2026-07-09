@@ -70,44 +70,24 @@ function FieldError({ errors }: { errors?: string[] }) {
 }
 
 export function ProjectActivityEditor({ mode, projectId, activity, options }: ProjectActivityEditorProps) {
-  const router = useRouter();
   const [open, setOpen] = useState(false);
-  const action = mode === "create" ? createProjectActivity : updateProjectActivity;
-  const [state, formAction] = useActionState(action, initialState);
+  const [formKey, setFormKey] = useState(0);
   const isCreate = mode === "create";
-  const defaultPhaseId = activity?.phaseId || options.phases[0]?.id || "";
-  const [selectedPhaseId, setSelectedPhaseId] = useState(defaultPhaseId);
-  const nextOrderByPhase = useMemo(
-    () => new Map(options.phases.map((phase) => [phase.id, phase.nextOrderIndex])),
-    [options.phases],
-  );
-  const [orderIndex, setOrderIndex] = useState(
-    String(activity?.orderIndex ?? nextOrderByPhase.get(defaultPhaseId) ?? 0),
-  );
 
-  useEffect(() => {
-    if (state.status !== "success") return;
-
-    router.refresh();
-    const timer = window.setTimeout(() => setOpen(false), 900);
-
-    return () => window.clearTimeout(timer);
-  }, [router, state.status]);
-
-  function handlePhaseChange(value: string) {
-    setSelectedPhaseId(value);
-
-    if (isCreate) {
-      setOrderIndex(String(nextOrderByPhase.get(value) ?? 0));
+  function handleOpenChange(nextOpen: boolean) {
+    if (nextOpen && isCreate) {
+      setFormKey((current) => current + 1);
     }
+
+    setOpen(nextOpen);
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       {isCreate ? (
         <Button
           type="button"
-          onClick={() => setOpen(true)}
+          onClick={() => handleOpenChange(true)}
           className="bg-slate-950 text-white shadow-[0_10px_25px_rgba(15,23,42,0.18)] hover:bg-slate-800"
         >
           <Plus data-icon="inline-start" />
@@ -125,6 +105,57 @@ export function ProjectActivityEditor({ mode, projectId, activity, options }: Pr
           Editar atividade
         </Button>
       )}
+      <ProjectActivityEditorContent
+        key={isCreate ? formKey : activity?.id}
+        mode={mode}
+        projectId={projectId}
+        activity={activity}
+        options={options}
+        closeModal={() => setOpen(false)}
+      />
+    </Dialog>
+  );
+}
+
+function ProjectActivityEditorContent({
+  mode,
+  projectId,
+  activity,
+  options,
+  closeModal,
+}: ProjectActivityEditorProps & { closeModal: () => void }) {
+  const router = useRouter();
+  const action = mode === "create" ? createProjectActivity : updateProjectActivity;
+  const [state, formAction] = useActionState(action, initialState);
+  const isCreate = mode === "create";
+  const defaultPhaseId = activity?.phaseId || options.phases[0]?.id || "";
+  const [selectedPhaseId, setSelectedPhaseId] = useState(defaultPhaseId);
+  const nextOrderByPhase = useMemo(
+    () => new Map(options.phases.map((phase) => [phase.id, phase.nextOrderIndex])),
+    [options.phases],
+  );
+  const [orderIndex, setOrderIndex] = useState(
+    String(activity?.orderIndex ?? nextOrderByPhase.get(defaultPhaseId) ?? 0),
+  );
+
+  useEffect(() => {
+    if (state.status !== "success") return;
+
+    router.refresh();
+    const timer = window.setTimeout(closeModal, 900);
+
+    return () => window.clearTimeout(timer);
+  }, [closeModal, router, state.status]);
+
+  function handlePhaseChange(value: string) {
+    setSelectedPhaseId(value);
+
+    if (isCreate) {
+      setOrderIndex(String(nextOrderByPhase.get(value) ?? 0));
+    }
+  }
+
+  return (
       <DialogContent className="max-h-[92vh] overflow-y-auto border-slate-200 bg-white p-0 shadow-[0_24px_70px_rgba(15,23,42,0.18)] sm:max-w-3xl">
         <DialogHeader className="border-b border-slate-100 bg-slate-50/80 p-5 sm:p-6">
           <DialogTitle className="text-xl font-bold text-slate-950">
@@ -291,6 +322,5 @@ export function ProjectActivityEditor({ mode, projectId, activity, options }: Pr
           </DialogFooter>
         </form>
       </DialogContent>
-    </Dialog>
   );
 }
