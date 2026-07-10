@@ -25,9 +25,8 @@ Giant Projects is a Next.js App Router product for executive project management 
 Run these before opening a PR when code changes are made:
 
 ```bash
-pnpm exec tsc --noEmit
-pnpm exec eslint .
-pnpm build
+pnpm verify:quick
+pnpm verify:full
 ```
 
 For Prisma work, only when the issue explicitly allows database changes:
@@ -41,15 +40,18 @@ pnpm exec prisma db seed
 
 ## Working Rules
 
-- Always work from an issue with objective, scope, out-of-scope items, and acceptance criteria.
+- Work from an approved issue or formal PO prompt with objective, scope, out-of-scope items, and acceptance criteria.
 - Always use a feature branch and PR.
 - Never commit `.env`, tokens, connection strings, credentials, or personal secrets.
 - Do not alter `prisma/schema.prisma`, migrations, or seed unless the issue explicitly says: `altera banco`.
 - Keep database access server-side only. Do not expose `DATABASE_URL` or Prisma to browser/client code.
 - Preserve the approved executive visual language unless the issue explicitly requests a visual change.
 - Keep changes small and controlled. Do not bundle unrelated refactors.
+- After implementation starts, keep scope frozen. Non-blocking improvements go to backlog.
+- Do not run global audits or unrelated refactors unless explicitly requested.
 - Do not implement authentication, CRUD, exports, or automation unless explicitly requested.
 - Do not merge automatically. Human review and merge are required.
+- Prefer a compact final report: branch, files, validations, database impact, limitations, and working tree.
 
 ## Required PR Summary
 
