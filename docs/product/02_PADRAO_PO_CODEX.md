@@ -1,52 +1,52 @@
-# 02 - Padrao PO-Codex v2.0
+# 02 - Padrão PO-Codex v2.0
 
-## Entrada Valida
+## Entrada Válida
 
 O Codex pode iniciar trabalho a partir de uma issue aprovada ou de um prompt formal aprovado pelo PO, desde que contenha:
 
 - objetivo;
 - escopo;
 - fora do escopo;
-- criterios de aceite;
-- validacoes esperadas.
+- critérios de aceite;
+- validações esperadas.
 
 ## Regra Principal
 
-Entregar primeiro a alteracao funcional, segura e validada. Melhorias nao impeditivas entram no backlog.
+Entregar primeiro a alteração funcional, segura e validada. Melhorias não impeditivas entram no backlog.
 
 ## Escopo Congelado
 
-Depois do inicio da implementacao, permanece na branch apenas o que for:
+Depois do início da implementação, permanece na branch apenas o que for:
 
 - impedimento real;
 - falha funcional;
-- regressao;
+- regressão;
 - risco de dados;
-- risco de seguranca;
-- criterio de aceite nao atendido.
+- risco de segurança;
+- critério de aceite não atendido.
 
-Nao realizar auditoria global, refatoracao ampla ou melhoria nao relacionada sem pedido explicito do PO.
+Não realizar auditoria global, refatoração ampla ou melhoria não relacionada sem pedido explícito do PO.
 
-## Validacao
+## Validação
 
-A validacao deve ser proporcional ao risco:
+A validação deve ser proporcional ao risco:
 
-- mudanca documental ou script isolado: validacao direcionada;
-- fluxo funcional: validacao tecnica e rota afetada;
-- banco, seguranca ou CI: validacao ampliada.
+- mudança documental ou script isolado: validação direcionada;
+- fluxo funcional: validação técnica e rota afetada;
+- banco, segurança ou CI: validação ampliada.
 
-O esperado e uma rodada consolidada de correcao. Se surgir melhoria nao bloqueante apos isso, registrar no backlog.
+O esperado é uma rodada consolidada de correção. Se surgir melhoria não bloqueante após isso, registrar no backlog.
 
 ## PR e Merge
 
 - Sempre usar branch e PR.
 - Merge sempre humano.
-- PR deve informar entregas, validacoes, impacto em banco, fora do escopo preservado e limitacoes.
-- Relatorio final deve ser compacto.
+- PR deve informar entregas, validações, impacto em banco, fora do escopo preservado e limitações.
+- Relatório final deve ser compacto.
 
 ## Guardrails
 
 - Nunca versionar `.env`, tokens ou credenciais.
-- Mudanca de banco exige autorizacao explicita: `altera banco`.
-- Codex nao deve alterar schema, migrations ou seed sem essa autorizacao.
-- Codigo e documentos versionados prevalecem sobre memoria de conversa.
+- Mudança de banco exige autorização explícita: `altera banco`.
+- Codex não deve alterar schema, migrations ou seed sem essa autorização.
+- Código e documentos versionados prevalecem sobre memória de conversa.
