@@ -11,14 +11,8 @@ import {
   updateProjectPhase,
 } from "@/app/(app)/projects/[projectId]/actions";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog } from "@/components/ui/dialog";
+import { DialogFormBody, DialogFormContent, DialogFormFooter, DialogFormHeader } from "@/components/ui/dialog-form-layout";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -98,31 +92,28 @@ export function ProjectPhaseEditor({ mode, projectId, phase, nextOrderIndex = 1 
           Editar fase
         </Button>
       )}
-      <DialogContent className="max-h-[92vh] overflow-y-auto border-slate-200 bg-white p-0 shadow-[0_24px_70px_rgba(15,23,42,0.18)] sm:max-w-3xl">
-        <DialogHeader className="border-b border-slate-100 bg-slate-50/80 p-5 sm:p-6">
-          <DialogTitle className="text-xl font-bold text-slate-950">
-            {isCreate ? "Nova fase do projeto" : "Editar fase do projeto"}
-          </DialogTitle>
-          <DialogDescription className="text-sm leading-6 text-slate-600">
-            Atualize apenas os dados da fase. Atividades, riscos, pendências e regras de consolidação continuam fora desta etapa.
-          </DialogDescription>
-        </DialogHeader>
+      <DialogFormContent>
+        <DialogFormHeader
+          title={isCreate ? "Nova fase do projeto" : "Editar fase do projeto"}
+          description="Atualize apenas os dados da fase. Atividades, riscos, pendências e regras de consolidação continuam fora desta etapa."
+        />
 
-        <form action={formAction} className="flex flex-col gap-5 p-5 sm:p-6">
-          <input type="hidden" name="projectId" value={projectId} />
-          {!isCreate ? <input type="hidden" name="phaseId" value={phase?.id ?? ""} /> : null}
+        <form action={formAction} className="flex min-h-0 flex-1 flex-col">
+          <DialogFormBody>
+            <input type="hidden" name="projectId" value={projectId} />
+            {!isCreate ? <input type="hidden" name="phaseId" value={phase?.id ?? ""} /> : null}
 
-          {state.message ? (
-            <div
-              className={
-                state.status === "success"
-                  ? "rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700"
-                  : "rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700"
-              }
-            >
-              {state.message}
-            </div>
-          ) : null}
+            {state.message ? (
+              <div
+                className={
+                  state.status === "success"
+                    ? "mb-5 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700"
+                    : "mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700"
+                }
+              >
+                {state.message}
+              </div>
+            ) : null}
 
           <div className="grid gap-4 md:grid-cols-2">
             <div className="flex flex-col gap-2 md:col-span-2">
@@ -229,12 +220,13 @@ export function ProjectPhaseEditor({ mode, projectId, phase, nextOrderIndex = 1 
               <FieldError errors={state.fieldErrors?.completedAt} />
             </div>
           </div>
+          </DialogFormBody>
 
-          <DialogFooter className="-mx-5 -mb-5 border-t border-slate-100 bg-slate-50/80 p-5 sm:-mx-6 sm:-mb-6 sm:p-6">
+          <DialogFormFooter>
             <SubmitButton mode={mode} />
-          </DialogFooter>
+          </DialogFormFooter>
         </form>
-      </DialogContent>
+      </DialogFormContent>
     </Dialog>
   );
 }

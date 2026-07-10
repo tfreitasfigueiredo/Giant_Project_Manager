@@ -8,7 +8,7 @@ export default async function ProjectsPage() {
   const projects = await getProjectsForList();
 
   return (
-    <PageContainer title="Projetos" description="Filtre, acompanhe e acesse a visao executiva de cada iniciativa.">
+    <PageContainer title="Projetos" description="Filtre, acompanhe e acesse a visão executiva de cada iniciativa." showPageHeader={false}>
       <ProjectsList projects={projects} />
     </PageContainer>
   );

@@ -11,6 +11,7 @@ export default async function DashboardPage() {
     <PageContainer
       title="Portfólio Giant Projects"
       description="Cockpit premium com KPIs executivos, projetos ativos, saúde, riscos, pendências e atividades recentes."
+      showPageHeader={false}
     >
       <ProjectDashboard data={dashboardData} />
     </PageContainer>

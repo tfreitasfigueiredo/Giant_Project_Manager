@@ -13,7 +13,7 @@ const rows = [
 
 export default function AdminPage() {
   return (
-    <PageContainer title="Administração / Unidades" description="Unidades operacionais e áreas executivas.">
+    <PageContainer title="Administração / Unidades" description="Unidades operacionais e áreas executivas." showPageHeader={false}>
       <div className="grid gap-4 md:grid-cols-3">
         <Card className="border-slate-200/80 bg-white shadow-[0_12px_35px_rgba(15,23,42,0.06)]">
           <CardContent className="flex min-h-28 items-center gap-4 p-5">

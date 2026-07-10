@@ -45,7 +45,13 @@ export default async function RisksPage({ params }: { params: Promise<{ projectI
   ];
 
   return (
-    <PageContainer title="Riscos" description={`${data.project.name} · severidade, impacto no go live, responsável e mitigação.`}>
+    <PageContainer title="Riscos" description={`${data.project.name} · severidade, impacto no go live, responsável e mitigação.`} showPageHeader={false}>
+      <div>
+        <p className="mb-1 text-sm font-semibold text-slate-500">{data.project.name}</p>
+        <h2 className="text-lg font-bold text-slate-950">Mapa de riscos</h2>
+        <p className="text-sm text-slate-500">Severidade, impacto no go live, responsável e mitigação.</p>
+      </div>
+
       <div className="grid gap-4 md:grid-cols-3">
         {summaryCards.map((item) => {
           const Icon = item.icon;
@@ -68,8 +74,8 @@ export default async function RisksPage({ params }: { params: Promise<{ projectI
 
       <section className="flex flex-col gap-4">
         <div>
-          <h3 className="text-lg font-bold text-slate-950">Mapa de riscos</h3>
-          <p className="text-sm text-slate-500">Priorização por severidade, dono e plano de mitigação.</p>
+          <h3 className="text-lg font-bold text-slate-950">Priorização executiva</h3>
+          <p className="text-sm text-slate-500">Riscos por severidade, dono e plano de mitigação.</p>
         </div>
         <div className="grid gap-4">
           {data.risks.map((risk) => (

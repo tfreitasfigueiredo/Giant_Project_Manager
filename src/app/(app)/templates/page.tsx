@@ -9,7 +9,7 @@ const templateIcons = [FolderKanban, ClipboardCheck, Layers3];
 
 export default function TemplatesPage() {
   return (
-    <PageContainer title="Templates" description="Modelos executivos para iniciar projetos com governança padronizada.">
+    <PageContainer title="Templates" description="Modelos executivos para iniciar projetos com governança padronizada." showPageHeader={false}>
       <div className="grid gap-4 sm:grid-cols-3">
         <Card className="border-slate-200/80 bg-white shadow-[0_12px_35px_rgba(15,23,42,0.06)] sm:col-span-2">
           <CardContent className="flex min-h-32 flex-col justify-center gap-2 p-5 sm:p-6">

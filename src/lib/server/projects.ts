@@ -117,17 +117,17 @@ const issueOriginMap: Record<string, string> = {
   CLIENT: "Cliente",
   INTERNAL: "Interna",
   PMO: "PMO",
-  OPERATIONS: "OperaÃ§Ãµes",
+  OPERATIONS: "Operações",
   TECHNOLOGY: "Tecnologia",
   COMMERCIAL: "Comercial",
   EXECUTIVE: "Executiva",
 };
 
 const phaseStatusMap: Record<string, string> = {
-  NOT_STARTED: "NÃ£o iniciada",
+  NOT_STARTED: "Não iniciada",
   IN_PROGRESS: "Em andamento",
   BLOCKED: "Bloqueada",
-  DONE: "ConcluÃ­da",
+  DONE: "Concluída",
   CANCELLED: "Cancelada",
 };
 
@@ -229,7 +229,8 @@ function sanitizeStatusReportHtml(html: string | null): string | null {
       const normalizedTag = tagName.toLowerCase();
       if (!allowedTags.has(normalizedTag)) return "";
 
-      return tag.startsWith("</") ? `</${normalizedTag}>` : `<${normalizedTag}>`;
+      const safeTag = normalizedTag === "h1" ? "h2" : normalizedTag;
+      return tag.startsWith("</") ? `</${safeTag}>` : `<${safeTag}>`;
     });
 }
 
@@ -242,7 +243,7 @@ function getClientLabel(project: { name: string; type: string; company: { name: 
 }
 
 function getUnitLabel(project: { type: string; unit: { name: string } | null }): string {
-  if (project.type === "IMPLEMENTATION") return "OperaÃ§Ãµes";
+  if (project.type === "IMPLEMENTATION") return "Operações";
   if (project.type === "CONTROL_TOWER") return "Control Tower";
   if (project.type === "DATA_PRODUCT") return "Planejamento";
 
@@ -282,7 +283,7 @@ function mapRiskToVisual(
     severity: mapRiskSeverity(risk.severity),
     owner: risk.owner?.name ?? "PMO",
     goLiveImpact: risk.goLiveImpact ?? "Sem impacto no go live registrado.",
-    mitigation: risk.mitigation ?? "Plano de mitigaÃ§Ã£o em definiÃ§Ã£o.",
+    mitigation: risk.mitigation ?? "Plano de mitigação em definição.",
   };
 }
 
@@ -307,8 +308,8 @@ function mapIssueToVisual(
     source: mapIssueOrigin(issue.origin),
     owner: issue.owner?.name ?? "PMO",
     dueDate: formatShortDate(issue.dueDate),
-    impact: issue.impact ?? "Impacto em avaliaÃ§Ã£o.",
-    nextAction: issue.nextAction ?? "PrÃ³xima aÃ§Ã£o em definiÃ§Ã£o.",
+    impact: issue.impact ?? "Impacto em avaliação.",
+    nextAction: issue.nextAction ?? "Próxima ação em definição.",
     critical: issue.isCritical || issue.priority === "CRITICAL",
   };
 }
@@ -351,7 +352,7 @@ export async function getProjectsForList(): Promise<Project[]> {
       progress: project.progress,
       plannedHours: Number(project.plannedHours),
       actualHours: Number(project.actualHours),
-      executiveSummary: project.executiveSummary ?? "Resumo executivo em atualizaÃ§Ã£o.",
+      executiveSummary: project.executiveSummary ?? "Resumo executivo em atualização.",
       nextSteps: project.nextSteps.map((step) => step.title),
       decisionsPending: project.decisions.filter((decision) => decision.status === "PENDING").length,
       executiveIssues: openExecutiveIssues,
@@ -427,7 +428,7 @@ export async function getProjectDetail(projectId: string): Promise<ProjectDetail
     progress: project.progress,
     plannedHours: Number(project.plannedHours),
     actualHours: Number(project.actualHours),
-    executiveSummary: project.executiveSummary ?? "Resumo executivo em atualizaÃ§Ã£o.",
+    executiveSummary: project.executiveSummary ?? "Resumo executivo em atualização.",
     nextSteps: project.nextSteps.map((step) => step.title),
     decisionsPending: project.decisions.filter((decision) => decision.status === "PENDING").length,
     executiveIssues: openExecutiveIssues,
@@ -461,7 +462,7 @@ export async function getProjectDetail(projectId: string): Promise<ProjectDetail
       severity: mapRiskSeverity(risk.severity),
       owner: risk.owner?.name ?? "PMO",
       goLiveImpact: risk.goLiveImpact ?? "Sem impacto no go live registrado.",
-      mitigation: risk.mitigation ?? "Plano de mitigaÃ§Ã£o em definiÃ§Ã£o.",
+      mitigation: risk.mitigation ?? "Plano de mitigação em definição.",
     })),
     issues: project.issues.map((issue) => ({
       id: issue.id,
@@ -470,15 +471,15 @@ export async function getProjectDetail(projectId: string): Promise<ProjectDetail
       source: mapIssueOrigin(issue.origin),
       owner: issue.owner?.name ?? "PMO",
       dueDate: formatShortDate(issue.dueDate),
-      impact: issue.impact ?? "Impacto em avaliaÃ§Ã£o.",
-      nextAction: issue.nextAction ?? "PrÃ³xima aÃ§Ã£o em definiÃ§Ã£o.",
+      impact: issue.impact ?? "Impacto em avaliação.",
+      nextAction: issue.nextAction ?? "Próxima ação em definição.",
       critical: issue.isCritical || issue.priority === "CRITICAL",
     })),
     statusSnapshot: latestSnapshot
       ? {
           status: mapProjectStatus(latestSnapshot.status),
           progress: latestSnapshot.progress,
-          healthLabel: latestSnapshot.healthLabel ?? "SaÃºde em acompanhamento",
+          healthLabel: latestSnapshot.healthLabel ?? "Saúde em acompanhamento",
           phaseName: latestSnapshot.phaseName ?? project.phaseName ?? "Planejamento",
           goLiveDate: formatDate(latestSnapshot.goLiveDate),
           highRisksCount: latestSnapshot.highRisksCount,
@@ -547,13 +548,33 @@ export async function getProjectActivitiesManagement(projectId: string): Promise
       tenantId: true,
       name: true,
       slug: true,
+      tenant: {
+        select: {
+          users: {
+            where: { status: "ACTIVE" },
+            orderBy: { name: "asc" },
+            select: { id: true, name: true },
+          },
+        },
+      },
       phases: {
         orderBy: { orderIndex: "asc" },
         select: { id: true, name: true, orderIndex: true },
       },
       activities: {
         orderBy: [{ orderIndex: "asc" }, { dueDate: "asc" }, { createdAt: "asc" }],
-        include: {
+        select: {
+          id: true,
+          title: true,
+          description: true,
+          status: true,
+          priority: true,
+          dueDate: true,
+          completedAt: true,
+          progress: true,
+          orderIndex: true,
+          phaseId: true,
+          ownerId: true,
           phase: { select: { name: true, orderIndex: true } },
           owner: { select: { name: true } },
         },
@@ -562,12 +583,6 @@ export async function getProjectActivitiesManagement(projectId: string): Promise
   });
 
   if (!project) return null;
-
-  const users = await prisma.appUser.findMany({
-    where: { tenantId: project.tenantId, status: "ACTIVE" },
-    orderBy: { name: "asc" },
-    select: { id: true, name: true },
-  });
 
   const sortedActivities = [...project.activities].sort((left, right) => {
     const phaseDiff = (left.phase?.orderIndex ?? Number.MAX_SAFE_INTEGER) - (right.phase?.orderIndex ?? Number.MAX_SAFE_INTEGER);
@@ -599,7 +614,7 @@ export async function getProjectActivitiesManagement(projectId: string): Promise
         orderIndex: phase.orderIndex,
         nextOrderIndex: nextOrderByPhase.get(phase.id) ?? 0,
       })),
-      users,
+      users: project.tenant.users,
     },
   };
 }
@@ -684,7 +699,7 @@ export async function getProjectStatusReport(projectId: string): Promise<Project
     progress: latestSnapshot?.progress ?? project.progress,
     plannedHours: Number(project.plannedHours),
     actualHours: Number(project.actualHours),
-    executiveSummary: latestSnapshot?.summary ?? project.executiveSummary ?? "Resumo executivo em atualizaÃ§Ã£o.",
+    executiveSummary: latestSnapshot?.summary ?? project.executiveSummary ?? "Resumo executivo em atualização.",
     nextSteps,
     decisionsPending: latestSnapshot?.decisionsPendingCount ?? project.decisions.filter((decision) => decision.status === "PENDING").length,
     executiveIssues: latestSnapshot?.criticalIssuesCount ?? openExecutiveIssues,
@@ -696,12 +711,12 @@ export async function getProjectStatusReport(projectId: string): Promise<Project
   return {
     project: baseProject,
     title: latestReport?.title ?? "Status Report Executivo",
-    period: latestReport ? `${formatDate(latestReport.periodStart)} - ${formatDate(latestReport.periodEnd)}` : "Sem perÃ­odo publicado",
+    period: latestReport ? `${formatDate(latestReport.periodStart)} - ${formatDate(latestReport.periodEnd)}` : "Sem período publicado",
     version: latestReport?.version ?? 1,
     publishedAt: formatDate(latestReport?.publishedAt ?? latestReport?.createdAt ?? null),
     executiveNarrative: baseProject.executiveSummary,
-    highlights: completedTitles.length > 0 ? completedTitles : [`${baseProject.progress}% de avanÃ§o consolidado no projeto.`],
-    attentionPoints: attentionPoints.length > 0 ? attentionPoints : ["Sem ponto crÃ­tico registrado no Ãºltimo status."],
+    highlights: completedTitles.length > 0 ? completedTitles : [`${baseProject.progress}% de avanço consolidado no projeto.`],
+    attentionPoints: attentionPoints.length > 0 ? attentionPoints : ["Sem ponto crítico registrado no último status."],
     nextSteps,
     risks: displayRisks,
     issues: displayIssues,
@@ -716,7 +731,7 @@ export async function getProjectStatusReport(projectId: string): Promise<Project
       ? {
           status: mapProjectStatus(latestSnapshot.status),
           progress: latestSnapshot.progress,
-          healthLabel: latestSnapshot.healthLabel ?? "SaÃºde em acompanhamento",
+          healthLabel: latestSnapshot.healthLabel ?? "Saúde em acompanhamento",
           phaseName: latestSnapshot.phaseName ?? project.phaseName ?? "Planejamento",
           goLiveDate: formatDate(latestSnapshot.goLiveDate),
           highRisksCount: latestSnapshot.highRisksCount,

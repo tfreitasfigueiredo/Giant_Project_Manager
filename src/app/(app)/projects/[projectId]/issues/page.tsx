@@ -53,7 +53,13 @@ export default async function IssuesPage({ params }: { params: Promise<{ project
   ];
 
   return (
-    <PageContainer title="Pendências" description={`${data.project.name} · origem, responsável, prazo, impacto e próxima ação.`}>
+    <PageContainer title="Pendências" description={`${data.project.name} · origem, responsável, prazo, impacto e próxima ação.`} showPageHeader={false}>
+      <div>
+        <p className="mb-1 text-sm font-semibold text-slate-500">{data.project.name}</p>
+        <h2 className="text-lg font-bold text-slate-950">Fila de pendências</h2>
+        <p className="text-sm text-slate-500">Origem, responsável, prazo, impacto e próxima ação.</p>
+      </div>
+
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {summaryCards.map((item) => {
           const Icon = item.icon;
@@ -76,8 +82,8 @@ export default async function IssuesPage({ params }: { params: Promise<{ project
 
       <section className="flex flex-col gap-4">
         <div>
-          <h3 className="text-lg font-bold text-slate-950">Fila de pendências</h3>
-          <p className="text-sm text-slate-500">Priorização por criticidade, prazo, impacto e próxima ação.</p>
+          <h3 className="text-lg font-bold text-slate-950">Priorização operacional</h3>
+          <p className="text-sm text-slate-500">Pendências por criticidade, prazo, impacto e próxima ação.</p>
         </div>
         <div className="grid gap-4">
           {data.issues.map((issue) => (

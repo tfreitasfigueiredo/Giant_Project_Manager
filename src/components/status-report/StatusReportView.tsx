@@ -142,7 +142,7 @@ export function StatusReportView({ report }: { report: ProjectStatusReportData }
             </CardHeader>
             <CardContent>
               <div
-                className="space-y-3 text-sm leading-6 text-slate-700 [&_h1]:text-xl [&_h1]:font-semibold [&_li]:ml-5 [&_li]:list-disc"
+                className="space-y-3 text-sm leading-6 text-slate-700 [&_h2]:text-xl [&_h2]:font-semibold [&_li]:ml-5 [&_li]:list-disc"
                 dangerouslySetInnerHTML={{ __html: report.sanitizedHtml }}
               />
             </CardContent>

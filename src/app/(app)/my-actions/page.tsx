@@ -44,7 +44,7 @@ const summaryCards = [
 
 export default function MyActionsPage() {
   return (
-    <PageContainer title="Minhas Ações" description="Pendências e decisões que precisam de encaminhamento executivo.">
+    <PageContainer title="Minhas Ações" description="Pendências e decisões que precisam de encaminhamento executivo." showPageHeader={false}>
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {summaryCards.map((item) => {
           const Icon = item.icon;
