@@ -1,47 +1,52 @@
-﻿# 02 - Padrão PO -> Codex
+# 02 - Padrão PO-Codex v2.0
 
-## Fluxo Padrão
+## Entrada Válida
 
-1. PO cria issue com objetivo, contexto, escopo, fora de escopo e critérios de aceite.
-2. PO revisa se há risco de banco, autenticação, segurança ou mudança visual ampla.
-3. PO aplica a label `ready-for-codex` apenas quando a issue estiver pronta.
-4. Workflow comenta na issue com instrução para o Codex.
-5. Codex cria branch, implementa, valida e abre PR.
-6. PO revisa arquivos alterados, valida escopo e aprova ou pede ajuste.
-7. Merge é sempre humano.
+O Codex pode iniciar trabalho a partir de uma issue aprovada ou de um prompt formal aprovado pelo PO, desde que contenha:
 
-## Estrutura de Prompt Esperada
+- objetivo;
+- escopo;
+- fora do escopo;
+- critérios de aceite;
+- validações esperadas.
 
-Toda tarefa para Codex deve conter:
+## Regra Principal
 
-- Contexto.
-- Objetivo.
-- Escopo obrigatório.
-- Fora de escopo.
-- Tarefas técnicas.
-- Critérios de aceite.
-- Validações obrigatórias.
-- Commit esperado, quando aplicável.
+Entregar primeiro a alteração funcional, segura e validada. Melhorias não impeditivas entram no backlog.
+
+## Escopo Congelado
+
+Depois do início da implementação, permanece na branch apenas o que for:
+
+- impedimento real;
+- falha funcional;
+- regressão;
+- risco de dados;
+- risco de segurança;
+- critério de aceite não atendido.
+
+Não realizar auditoria global, refatoração ampla ou melhoria não relacionada sem pedido explícito do PO.
+
+## Validação
+
+A validação deve ser proporcional ao risco:
+
+- mudança documental ou script isolado: validação direcionada;
+- fluxo funcional: validação técnica e rota afetada;
+- banco, segurança ou CI: validação ampliada.
+
+O esperado é uma rodada consolidada de correção. Se surgir melhoria não bloqueante após isso, registrar no backlog.
+
+## PR e Merge
+
+- Sempre usar branch e PR.
+- Merge sempre humano.
+- PR deve informar entregas, validações, impacto em banco, fora do escopo preservado e limitações.
+- Relatório final deve ser compacto.
 
 ## Guardrails
 
-- Nunca enviar e-mail direto para Codex.
-- Nunca fazer merge automático.
-- Sempre usar issue antes do desenvolvimento.
-- Sempre usar branch e PR.
-- Sempre declarar critérios de aceite.
-- Nunca incluir `.env`, tokens, secrets ou connection strings.
-- Mudança de banco exige declaração explícita: `altera banco`.
-- Codex deve informar rotas testadas, comandos rodados e arquivos alterados em todo PR.
-
-## Como Revisar PRs do Codex
-
-Antes do merge, conferir:
-
-- Arquivos alterados batem com o escopo da issue.
-- `.env` não aparece.
-- Prisma não foi alterado sem autorização.
-- Build, TypeScript e ESLint passaram.
-- Rotas afetadas foram testadas.
-- Não houve expansão de escopo.
-- O resumo do PR explica limitações e próximos passos.
+- Nunca versionar `.env`, tokens ou credenciais.
+- Mudança de banco exige autorização explícita: `altera banco`.
+- Codex não deve alterar schema, migrations ou seed sem essa autorização.
+- Código e documentos versionados prevalecem sobre memória de conversa.
